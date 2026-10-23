@@ -36,7 +36,7 @@ let tab = 'home', result = null, worker, workerTimer, workerUrl, busy = false, d
 let notes = '', rawDraft = '', replyError = '', pendingId = '', draftConfirmed = false, confirmations = {};
 let bridgeReady = false, hostLoading = hostSession, saveQueue = Promise.resolve(), saveVersion = 0, requestVersion = 0;
 let saveState = restoredCourse && !restoreScheduleDiscarded ? 'saved' : 'unsaved', aiSaveState = 'saved', dialog = null;
-let delayTask = '', delayMinutes = 5, copyFallbackText = '';
+let delayTask = '', delayMinutes = 5, copyFallbackText = '', clockRevision = 0;
 let paper = preferences.paper === 'Letter' ? 'Letter' : 'A4';
 let apiEnabled = false, apiUrl = '', apiModel = '', apiKey = '', apiBusy = false, apiError = '', apiAbort = null;
 const apiErrors = new Set(['apiInvalidUrl', 'apiMissingModel', 'apiInvalidKey', 'apiTimeout', 'apiNetwork', 'apiHttp', 'apiInvalidReply', 'apiTooLarge', 'apiCancelled']);
@@ -97,6 +97,7 @@ function invalidateDraftRequest() {
   draftConfirmed = false; replyError = ''; copyFallbackText = ''; saveAI();
 }
 function changed() {
+  clockRevision++;
   stopSolver(); schedule = []; result = null; confirmations = {};
   invalidateDraftRequest(); save();
 }
@@ -110,7 +111,7 @@ function issuesHTML(issues) { return `<ul class="issues">${issues.map(i => `<li>
 function render() {
   document.documentElement.lang = lang; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   flushSync(() => reactRoot.render(createElement(Workbench, {
-    project, schedule, tab, result, workerBusy: Boolean(worker), busy, draft, notes, rawDraft, pendingId, replyError,
+    project, schedule, clockRevision, tab, result, workerBusy: Boolean(worker), busy, draft, notes, rawDraft, pendingId, replyError,
     bridgeReady, hostLoading, saveState, aiSaveState, paper, lang, languages, t, u, n, issueText, dialog,
     problems: auditResources(project), validation: validateProject(project), draftProblems: draft ? auditResources(draft) : [],
     draftConfirmed, confirmations, delayTask, delayMinutes, makePrompt: () => copyFallbackText || makePrompt(),
@@ -128,6 +129,7 @@ function render() {
 }
 function askReplace(title, accept) { dialog = { title, accept, returnFocus: document.activeElement }; render(); }
 function replaceCourse(loaded) {
+  clockRevision++;
   stopSolver(); project = loaded.project; schedule = loaded.schedule || [];
   result = null; confirmations = {}; delayTask = '';
   notes = ''; rawDraft = ''; invalidateDraftRequest();
@@ -157,7 +159,7 @@ function runSolver(type, taskId, extra) {
       project = data.project;
       if (type === 'replan') invalidateDraftRequest();
     }
-    schedule = result.schedule; save();
+    schedule = result.schedule; clockRevision++; save();
   }
   worker.onmessage = event => finish(event.data);
   worker.onerror = () => finish({ error: 'noPlanFound' });

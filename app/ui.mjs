@@ -1,7 +1,8 @@
-import { createElement as h, createContext, useContext, useRef, useState } from 'react';
+import { createElement as h, createContext, useContext, useEffect, useRef, useState } from 'react';
 import * as Modal from '@radix-ui/react-dialog';
 import { Icon } from './icons.mjs';
 import logo from './logo.svg';
+import { elapsedSeconds, pauseClock, resumeClock, formatClock, lessonSnapshot } from './lesson-clock.mjs';
 
 const Context = createContext(null);
 const useUI = () => useContext(Context);
@@ -77,6 +78,7 @@ function HomePortal() {
     h('div', { className: 'portal-section-title' }, h('h2', null, u('homeTools')), h('span', null, u('homeToolsHint'))),
     h('div', { className: 'portal-modules' }, items.map((item, i) => h('button', { key: item.id, type: 'button', className: `module-entry module-${item.id}`, onClick: () => onNavigate(item.id) },
       h('span', { className: 'module-number', 'aria-hidden': true }, `0${i + 1}`), h('span', { className: 'module-text' }, h('strong', null, item.title), h('small', null, item.help)), h('span', { className: 'module-meta' }, item.detail), h(Icon, { name: 'next', className: 'module-arrow', size: 16 })))),
+    h('details', { className: 'home-purpose' }, h('summary', null, u('missionTitle')), h('p', null, u('missionNow')), h('p', null, u('missionLimits')), h('p', null, u('missionFree')), h('p', null, u('missionNext'))),
     h('div', { className: 'portal-bottom' }, h('span', { className: `save-state ${saveState}`, role: 'status' }, h(Icon, { name: 'save', size: 13 }), hostLoading ? u('loading') : u(saveState)),
       h('div', { className: 'portal-file-actions' }, h(Button, { action: 'new', variant: 'ghost', icon: 'new' }, u('homeNew')), h(Button, { action: 'sample', variant: 'ghost', icon: 'sample' }, t('sample')), h(Button, { action: 'export', variant: 'ghost', icon: 'export' }, t('export')))));
 }
@@ -192,6 +194,42 @@ function Timeline() {
     }))),
     h(ActivityDetails, { activity: selectedActivity, slot: selectedSlot, project: p, open: detailsOpen, onOpenChange: setDetailsOpen, trigger: trigger.current }));
 }
+function LessonClock() {
+  const { project, schedule, lang, u, t, n } = useUI();
+  const [clock, setClock] = useState({ elapsed: 0, since: null });
+  const [now, setNow] = useState(() => performance.now());
+  const view = lessonSnapshot(project, schedule, elapsedSeconds(clock, now));
+  const running = clock.since != null && !view.complete;
+  useEffect(() => {
+    if (clock.since == null) return;
+    const tick = () => setNow(performance.now());
+    const interval = setInterval(tick, 250);
+    document.addEventListener('visibilitychange', tick);
+    return () => { clearInterval(interval); document.removeEventListener('visibilitychange', tick); };
+  }, [clock.since]);
+  useEffect(() => {
+    if (view.complete && clock.since != null) setClock({ elapsed: project.duration * 60, since: null });
+  }, [view.complete, clock.since, project.duration]);
+  const toggle = () => {
+    const time = performance.now(); setNow(time);
+    setClock(current => current.since == null ? resumeClock(current, time) : pauseClock(current, time));
+  };
+  const status = view.complete ? 'clockComplete' : running ? 'clockRunning' : clock.elapsed > 0 ? 'clockPaused' : 'clockReady';
+  return h(Card, { className: 'lesson-clock', 'aria-label': u('clockTitle') },
+    h('div', { className: 'clock-heading' }, h('div', null, h('p', { className: 'overline' }, u('clockTitle')), h('h2', null, project.title || u('untitled'))), h(Badge, { tone: running ? 'success' : '' }, u(status))),
+    h('p', { className: 'muted' }, u('clockHelp')),
+    !schedule.length ? h('p', { role: 'status' }, t('invalidSchedule')) : h('div', null,
+      h('div', { className: 'clock-controls' }, h('div', null, h('span', { className: 'clock-digits', role: 'timer', 'aria-label': u('clockElapsed'), dir: 'ltr' }, formatClock(view.seconds, lang)), h('small', { className: 'muted' }, `${u('clockRemaining')} ${formatClock(Math.ceil(view.remaining), lang)}`)),
+        h('div', { className: 'button-row' }, h(Button, { variant: 'primary', onClick: toggle, disabled: view.complete, 'data-clock': 'toggle', icon: 'clock' }, u(running ? 'clockPause' : clock.elapsed > 0 ? 'clockResume' : 'clockStart')), h(Button, { onClick: () => { setClock({ elapsed: 0, since: null }); setNow(performance.now()); }, 'data-clock': 'reset' }, u('clockReset')))),
+      h('progress', { className: 'clock-progress', value: view.seconds, max: project.duration * 60, 'aria-label': u('clockElapsed') }),
+      h('div', { className: 'clock-focus', role: 'status' }, h('strong', null, view.complete ? u('clockComplete') : view.teacher ? `${u('clockTeacher')} ${view.teacher.group.name}` : u('clockObserve')), !view.complete && view.nextChange != null && h('span', null, `${u('clockChange')} ${formatClock(Math.ceil(view.nextChange), lang)}`)),
+      h('div', { className: 'clock-groups' }, view.groups.map(item => h('article', { className: `clock-group ${item.task?.mode === 'teacher' ? 'with-teacher' : ''}`, key: item.group.id },
+        h('div', { className: 'clock-group-heading' }, h('h3', null, item.group.name), item.task && h(Badge, null, t(item.task.mode))),
+        h('strong', null, item.task?.title || u(item.complete ? 'clockGroupComplete' : 'clockWaiting')),
+        item.task && h('p', null, item.task.objective),
+        item.active && h('p', { className: 'muted' }, `${u('clockActivityRemaining')} ${formatClock(Math.ceil(item.active.end * 60 - view.seconds), lang)}`),
+        item.nextTask && h('p', { className: 'clock-next' }, `${u('clockNext')} ${item.nextTask.title} · ${n(item.next.start)} ${t('min')}`))))));
+}
 function Flow() {
   const { project: p, schedule, result, workerBusy, problems, t, u, n, onNavigate, delayTask, delayMinutes, onField } = useUI();
   return h('div', null, h(PageHeading, { title: t('timeline'), description: t('timelineHelp') }),
@@ -277,5 +315,6 @@ export function Dialog() {
 }
 export function Workbench(props) {
   const { t, u, tab, hostLoading, onFile } = props;
-  return h(Context.Provider, { value: props }, h('div', { className: `app-shell ${tab === 'home' ? 'is-home' : ''}` }, h('a', { className: 'skip-link', href: '#main-content', onClick: event => { event.preventDefault(); const main = document.querySelector('#main-content'); main.focus({ preventScroll: true }); main.scrollIntoView({ block: 'start' }); } }, u('workspace')), h(AppHeader), h('div', { className: 'workspace' }, tab !== 'home' && h(Topbar), h('main', { id: 'main-content', tabIndex: -1, className: tab === 'home' ? 'home-main' : '' }, h('fieldset', { disabled: hostLoading, className: 'workbench-fieldset', 'aria-busy': hostLoading }, tab !== 'home' && h(Toolbar), h(({ home: HomePortal, overview: Overview, flow: Flow, fit: Fit, ai: AI })[tab]))), h('footer', null, h('span', null, 'Classroom Commons · v0.6.0'), h('span', null, t('free')))), h('input', { id: 'file-input', type: 'file', accept: '.json,application/json', hidden: true, onChange: onFile }), h(Dialog)));
+  const clockKey = JSON.stringify([props.clockRevision, props.project, props.schedule]);
+  return h(Context.Provider, { value: props }, h('div', { className: `app-shell ${tab === 'home' ? 'is-home' : ''}` }, h('a', { className: 'skip-link', href: '#main-content', onClick: event => { event.preventDefault(); const main = document.querySelector('#main-content'); main.focus({ preventScroll: true }); main.scrollIntoView({ block: 'start' }); } }, u('workspace')), h(AppHeader), h('div', { className: 'workspace' }, tab !== 'home' && h(Topbar), h('main', { id: 'main-content', tabIndex: -1, className: tab === 'home' ? 'home-main' : '' }, h('fieldset', { disabled: hostLoading, className: 'workbench-fieldset', 'aria-busy': hostLoading }, tab !== 'home' && h(Toolbar), h('div', { hidden: tab !== 'flow' }, h(LessonClock, { key: clockKey })), h(({ home: HomePortal, overview: Overview, flow: Flow, fit: Fit, ai: AI })[tab]))), h('footer', null, h('span', null, 'Classroom Commons · v0.6.1'), h('span', null, t('free')))), h('input', { id: 'file-input', type: 'file', accept: '.json,application/json', hidden: true, onChange: onFile }), h(Dialog)));
 }
