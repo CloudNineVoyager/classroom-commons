@@ -1,0 +1,138 @@
+{
+  "format": "classroom-commons-course",
+  "fileVersion": 1,
+  "project": {
+    "version": 1,
+    "title": "不用练习纸：口头数的组成",
+    "duration": 20,
+    "groups": [
+      {
+        "id": "g1",
+        "name": "口头数数组",
+        "canRead": false,
+        "independentLimit": 10
+      },
+      {
+        "id": "g2",
+        "name": "口头分解组",
+        "canRead": false,
+        "independentLimit": 10
+      }
+    ],
+    "resources": [],
+    "tasks": [
+      {
+        "id": "t0",
+        "groupId": "g1",
+        "title": "老师示范轮流口头数到5",
+        "objective": "听懂轮流数数的口头规则；教师先按本组语言示范。",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "t1",
+        "groupId": "g1",
+        "title": "两人轮流数到5，停下再重新数",
+        "objective": "按刚才示范练习轮流说数。教师确认小组能独立练习后再安排。",
+        "duration": 5,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "t0"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "t2",
+        "groupId": "g1",
+        "title": "向老师展示轮流数数",
+        "objective": "核对数的顺序和轮流规则。",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "t1"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "t3",
+        "groupId": "g2",
+        "title": "老师示范口头说出合成5的两数",
+        "objective": "用口头示范说明两数合成5；按已有学习情况调整难度。",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "t4",
+        "groupId": "g2",
+        "title": "两人轮流说出一组数，让伙伴核对",
+        "objective": "按示范口头练习，在不打扰另一组的音量下互相核对。",
+        "duration": 5,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "t3"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "t5",
+        "groupId": "g2",
+        "title": "向老师解释一种合成5的方法",
+        "objective": "用自己的话说明两个数合成5。",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "t4"
+        ],
+        "needs": [],
+        "alternative": null
+      }
+    ]
+  },
+  "schedule": [
+    {
+      "taskId": "t0",
+      "start": 0,
+      "end": 5
+    },
+    {
+      "taskId": "t3",
+      "start": 5,
+      "end": 10
+    },
+    {
+      "taskId": "t1",
+      "start": 5,
+      "end": 10
+    },
+    {
+      "taskId": "t2",
+      "start": 10,
+      "end": 15
+    },
+    {
+      "taskId": "t4",
+      "start": 10,
+      "end": 15
+    },
+    {
+      "taskId": "t5",
+      "start": 15,
+      "end": 20
+    }
+  ]
+}

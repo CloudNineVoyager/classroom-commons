@@ -1,0 +1,138 @@
+{
+  "format": "classroom-commons-course",
+  "fileVersion": 1,
+  "project": {
+    "version": 1,
+    "title": "No worksheets: spoken number bonds",
+    "duration": 20,
+    "groups": [
+      {
+        "id": "g1",
+        "name": "Oral counting",
+        "canRead": false,
+        "independentLimit": 10
+      },
+      {
+        "id": "g2",
+        "name": "Oral number bonds",
+        "canRead": false,
+        "independentLimit": 10
+      }
+    ],
+    "resources": [],
+    "tasks": [
+      {
+        "id": "t0",
+        "groupId": "g1",
+        "title": "Teacher models taking turns counting to 5",
+        "objective": "Understand turn-taking through a spoken demonstration in the group language.",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "t1",
+        "groupId": "g1",
+        "title": "Pairs take turns counting to 5, pausing and restarting",
+        "objective": "Practise the demonstrated routine; teacher must confirm readiness for independent pair work.",
+        "duration": 5,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "t0"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "t2",
+        "groupId": "g1",
+        "title": "Show turn-taking counting to the teacher",
+        "objective": "Check number order and turn-taking.",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "t1"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "t3",
+        "groupId": "g2",
+        "title": "Teacher models saying two numbers that make 5",
+        "objective": "Demonstrate two spoken numbers making 5; adapt difficulty to prior learning.",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "t4",
+        "groupId": "g2",
+        "title": "Pairs suggest number bonds and check each other",
+        "objective": "Practise the model and peer-check at a volume that does not disrupt the other group.",
+        "duration": 5,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "t3"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "t5",
+        "groupId": "g2",
+        "title": "Explain one number bond to the teacher",
+        "objective": "Explain in your own words how two numbers make 5.",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "t4"
+        ],
+        "needs": [],
+        "alternative": null
+      }
+    ]
+  },
+  "schedule": [
+    {
+      "taskId": "t0",
+      "start": 0,
+      "end": 5
+    },
+    {
+      "taskId": "t3",
+      "start": 5,
+      "end": 10
+    },
+    {
+      "taskId": "t1",
+      "start": 5,
+      "end": 10
+    },
+    {
+      "taskId": "t2",
+      "start": 10,
+      "end": 15
+    },
+    {
+      "taskId": "t4",
+      "start": 10,
+      "end": 15
+    },
+    {
+      "taskId": "t5",
+      "start": 15,
+      "end": 20
+    }
+  ]
+}
