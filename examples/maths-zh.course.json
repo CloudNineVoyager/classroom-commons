@@ -1,0 +1,182 @@
+{
+  "format": "classroom-commons-course",
+  "fileVersion": 1,
+  "project": {
+    "version": 1,
+    "title": "一起认识数的组成",
+    "duration": 40,
+    "groups": [
+      {
+        "id": "g1",
+        "name": "初学组",
+        "canRead": false,
+        "independentLimit": 15
+      },
+      {
+        "id": "g2",
+        "name": "进阶组",
+        "canRead": true,
+        "independentLimit": 20
+      }
+    ],
+    "resources": [
+      {
+        "id": "counters",
+        "name": "计数石子",
+        "quantity": 20
+      },
+      {
+        "id": "board",
+        "name": "黑板区",
+        "quantity": 1
+      },
+      {
+        "id": "paper",
+        "name": "练习纸（张）",
+        "quantity": 0
+      }
+    ],
+    "tasks": [
+      {
+        "id": "a1",
+        "groupId": "g1",
+        "title": "示范把 5 分成两堆",
+        "objective": "用实物表示数的分解",
+        "duration": 10,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          }
+        ],
+        "alternative": null
+      },
+      {
+        "id": "a2",
+        "groupId": "g1",
+        "title": "按示范用石子组成 5",
+        "objective": "独立摆出两种分法",
+        "duration": 10,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "a1"
+        ],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          }
+        ],
+        "alternative": null
+      },
+      {
+        "id": "a3",
+        "groupId": "g1",
+        "title": "检查分法并口头反馈",
+        "objective": "解释两堆合起来仍是 5",
+        "duration": 10,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "a2"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "b1",
+        "groupId": "g2",
+        "title": "示范两位数分解",
+        "objective": "理解两位数由十和一组成",
+        "duration": 10,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [],
+        "needs": [
+          {
+            "resourceId": "board",
+            "quantity": 1
+          }
+        ],
+        "alternative": null
+      },
+      {
+        "id": "b2",
+        "groupId": "g2",
+        "title": "看黑板题目，两人用石子摆数并互查",
+        "objective": "表示并核对两位数的分解",
+        "duration": 10,
+        "mode": "independent",
+        "requiresReading": true,
+        "after": [
+          "b1"
+        ],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          },
+          {
+            "resourceId": "board",
+            "quantity": 1
+          }
+        ],
+        "alternative": null,
+        "adaptation": {
+          "rationale": "保留“表示并核对”的目标，用实物与同伴口头核对代替纸上作答。请老师确认任务适合本组。",
+          "teacherConfirmed": true
+        }
+      },
+      {
+        "id": "b3",
+        "groupId": "g2",
+        "title": "比较两种表示方法",
+        "objective": "解释十和一之间的关系",
+        "duration": 10,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "b2"
+        ],
+        "needs": [],
+        "alternative": null
+      }
+    ]
+  },
+  "schedule": [
+    {
+      "taskId": "a1",
+      "start": 0,
+      "end": 10
+    },
+    {
+      "taskId": "b1",
+      "start": 10,
+      "end": 20
+    },
+    {
+      "taskId": "a2",
+      "start": 10,
+      "end": 20
+    },
+    {
+      "taskId": "a3",
+      "start": 20,
+      "end": 30
+    },
+    {
+      "taskId": "b2",
+      "start": 20,
+      "end": 30
+    },
+    {
+      "taskId": "b3",
+      "start": 30,
+      "end": 40
+    }
+  ]
+}

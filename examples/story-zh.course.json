@@ -1,0 +1,297 @@
+{
+  "format": "classroom-commons-course",
+  "fileVersion": 1,
+  "project": {
+    "version": 1,
+    "title": "石子里的故事：先后顺序与原因",
+    "duration": 30,
+    "groups": [
+      {
+        "id": "g1",
+        "name": "初学组",
+        "canRead": false,
+        "independentLimit": 10
+      },
+      {
+        "id": "g2",
+        "name": "进阶组",
+        "canRead": true,
+        "independentLimit": 10
+      }
+    ],
+    "resources": [
+      {
+        "id": "counters",
+        "name": "计数石子（颗）",
+        "quantity": 20
+      },
+      {
+        "id": "board",
+        "name": "黑板区（处）",
+        "quantity": 1
+      },
+      {
+        "id": "paper",
+        "name": "纸卡（张）",
+        "quantity": 0
+      }
+    ],
+    "tasks": [
+      {
+        "id": "a1",
+        "groupId": "g1",
+        "title": "听三步小故事，指出先发生什么",
+        "objective": "老师口述自编小故事：“我装好种子，带到花园，种进土里。”说一件，伸一根手指。学生跟着做动作，再说“先装好，再带去，最后种下”。观察学生能否把三个动作按原顺序说出；不要求识字。",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "a2",
+        "groupId": "g1",
+        "title": "两人用石子排出故事三步",
+        "objective": "沿用刚才示范的玩法，两人轮流用三颗石子代表三件事：摆一颗，说一句；同伴听完用手指指出第一件和最后一件。完成一轮后交换角色。检验能否按顺序复述，不把石子大小或颜色当作对错标准。",
+        "duration": 5,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "a1"
+        ],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          }
+        ],
+        "alternative": null
+      },
+      {
+        "id": "a3",
+        "groupId": "g1",
+        "title": "老师听复述，追问前后关系",
+        "objective": "请两名学生各说一遍三步故事。老师问：“哪一步先？如果还没带到花园，就说已经在那里种好，哪里需要补一句？”用追问帮助学生修正表达，不要求唯一措辞。记录是否能用“先、再、最后”。",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "a2"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "a4",
+        "groupId": "g1",
+        "title": "同伴轮流说，另一人按顺序摆石子",
+        "objective": "复用已经练过的轮流规则。一人说三件连续的小事，另一人依次摆三颗石子；然后一起检查有没有漏掉或重复。学生可以选择熟悉的进教室、整理物品等日常情境，不要求介绍家庭情况。",
+        "duration": 5,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "a3"
+        ],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          }
+        ],
+        "alternative": null
+      },
+      {
+        "id": "a5",
+        "groupId": "g1",
+        "title": "老师帮助补全缺少的一步",
+        "objective": "老师把一个三步故事故意漏掉中间一步，请学生补出能衔接前后的一句，并说出它应该放在哪里。允许多个合理答案；检查顺序和表达是否清楚，而不是猜老师心里的原句。",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "a4"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "a6",
+        "groupId": "g1",
+        "title": "用三个手势复述并互相核对",
+        "objective": "两人继续熟悉的轮流活动，用三个手势标记自己的故事三步，伙伴用手指按一、二、三回应。说完交换角色；有遗漏就请伙伴再说一次。结束时每人准备一句自己最清楚的顺序表达。",
+        "duration": 5,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "a5"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "b0",
+        "groupId": "g2",
+        "title": "做以前练过的三步摆石子游戏",
+        "objective": "这是教师已确认学生熟悉的开场常规：两人轮流摆三小堆石子，说清“先摆哪堆、再摆哪堆、最后哪堆”，伙伴照做后交换。只复用已会规则，不在老师未到场时引入新学习要求。",
+        "duration": 5,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          }
+        ],
+        "alternative": null
+      },
+      {
+        "id": "b1",
+        "groupId": "g2",
+        "title": "老师示范顺序句与原因句",
+        "objective": "老师沿用种子小故事，示范“先……再……最后……”和“因为……所以……”的区别：前者排列事件，后者说明关系。让学生提出一个理由，解释为什么某一步需要放在另一件事之前；合理即可，不宣称所有故事只有一种顺序。",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "b0"
+        ],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          }
+        ],
+        "alternative": null
+      },
+      {
+        "id": "b2",
+        "groupId": "g2",
+        "title": "无纸卡：石子代表三句，伙伴口头排序",
+        "objective": "目标是把三句事件整理成可理解的顺序，并口头解释一个安排理由。原活动需要纸卡，但实际库存为零，须先解决材料缺口，再让学生自主进行。",
+        "duration": 5,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "b1"
+        ],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          }
+        ],
+        "alternative": null,
+        "adaptation": {
+          "rationale": "保留“整理事件顺序并解释一个理由”的目标。沿用老师刚示范的三句故事，用三颗石子作记号；一人摆并逐句说，另一人提出一种调整并说明理由，再交换。无需纸张或自主阅读，具体适用性由老师确认。",
+          "teacherConfirmed": true
+        }
+      },
+      {
+        "id": "b3",
+        "groupId": "g2",
+        "title": "老师检查顺序与理由是否对应",
+        "objective": "请学生展示一个排列并说“我这样排，因为……”。追问理由是否真的解释了这次排列；若有另一种也合理的顺序，让学生比较两种说法，而不是仅凭是否和示范一致判错。",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "b2"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "b4",
+        "groupId": "g2",
+        "title": "伙伴提出另一种顺序并互相追问",
+        "objective": "沿用已练过的两人轮流规则：一人讲一个三步日常小故事，另一人尝试调换两句并问“这样还能听懂吗？为什么？”双方说明理由后交换。无需书写或额外材料。",
+        "duration": 5,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "b3"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "b5",
+        "groupId": "g2",
+        "title": "老师用离堂问题检查顺序表达",
+        "objective": "请每人说一句包含“先……再……”的表达，并给一个能解释顺序的理由。老师分别记录“能排列事件”和“能说明理由”，给出下一次需要练习的一个具体点；不把单次表现当作能力定论。",
+        "duration": 5,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "b4"
+        ],
+        "needs": [],
+        "alternative": null
+      }
+    ]
+  },
+  "schedule": [
+    {
+      "taskId": "a1",
+      "start": 0,
+      "end": 5
+    },
+    {
+      "taskId": "b0",
+      "start": 0,
+      "end": 5
+    },
+    {
+      "taskId": "b1",
+      "start": 5,
+      "end": 10
+    },
+    {
+      "taskId": "a2",
+      "start": 5,
+      "end": 10
+    },
+    {
+      "taskId": "a3",
+      "start": 10,
+      "end": 15
+    },
+    {
+      "taskId": "b2",
+      "start": 10,
+      "end": 15
+    },
+    {
+      "taskId": "b3",
+      "start": 15,
+      "end": 20
+    },
+    {
+      "taskId": "a4",
+      "start": 15,
+      "end": 20
+    },
+    {
+      "taskId": "a5",
+      "start": 20,
+      "end": 25
+    },
+    {
+      "taskId": "b4",
+      "start": 20,
+      "end": 25
+    },
+    {
+      "taskId": "b5",
+      "start": 25,
+      "end": 30
+    },
+    {
+      "taskId": "a6",
+      "start": 25,
+      "end": 30
+    }
+  ]
+}

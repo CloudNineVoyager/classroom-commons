@@ -1,0 +1,182 @@
+{
+  "format": "classroom-commons-course",
+  "fileVersion": 1,
+  "project": {
+    "version": 1,
+    "title": "Making numbers together",
+    "duration": 40,
+    "groups": [
+      {
+        "id": "g1",
+        "name": "First steps",
+        "canRead": false,
+        "independentLimit": 15
+      },
+      {
+        "id": "g2",
+        "name": "Next steps",
+        "canRead": true,
+        "independentLimit": 20
+      }
+    ],
+    "resources": [
+      {
+        "id": "counters",
+        "name": "Counters / stones",
+        "quantity": 20
+      },
+      {
+        "id": "board",
+        "name": "Board space",
+        "quantity": 1
+      },
+      {
+        "id": "paper",
+        "name": "Printed sheets",
+        "quantity": 0
+      }
+    ],
+    "tasks": [
+      {
+        "id": "a1",
+        "groupId": "g1",
+        "title": "Model splitting 5 into two sets",
+        "objective": "Represent number bonds with objects",
+        "duration": 10,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          }
+        ],
+        "alternative": null
+      },
+      {
+        "id": "a2",
+        "groupId": "g1",
+        "title": "Build sets of 5 with stones",
+        "objective": "Build two different number bonds",
+        "duration": 10,
+        "mode": "independent",
+        "requiresReading": false,
+        "after": [
+          "a1"
+        ],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          }
+        ],
+        "alternative": null
+      },
+      {
+        "id": "a3",
+        "groupId": "g1",
+        "title": "Check combinations together",
+        "objective": "Explain why the total remains 5",
+        "duration": 10,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "a2"
+        ],
+        "needs": [],
+        "alternative": null
+      },
+      {
+        "id": "b1",
+        "groupId": "g2",
+        "title": "Model tens and ones",
+        "objective": "Represent tens and ones",
+        "duration": 10,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [],
+        "needs": [
+          {
+            "resourceId": "board",
+            "quantity": 1
+          }
+        ],
+        "alternative": null
+      },
+      {
+        "id": "b2",
+        "groupId": "g2",
+        "title": "Read board prompts; build and peer-check with stones",
+        "objective": "Represent and check two-digit numbers",
+        "duration": 10,
+        "mode": "independent",
+        "requiresReading": true,
+        "after": [
+          "b1"
+        ],
+        "needs": [
+          {
+            "resourceId": "counters",
+            "quantity": 10
+          },
+          {
+            "resourceId": "board",
+            "quantity": 1
+          }
+        ],
+        "alternative": null,
+        "adaptation": {
+          "rationale": "Keep representation and checking through objects and peer explanation instead of written answers. Teacher must confirm suitability.",
+          "teacherConfirmed": true
+        }
+      },
+      {
+        "id": "b3",
+        "groupId": "g2",
+        "title": "Compare representations",
+        "objective": "Explain the relationship between tens and ones",
+        "duration": 10,
+        "mode": "teacher",
+        "requiresReading": false,
+        "after": [
+          "b2"
+        ],
+        "needs": [],
+        "alternative": null
+      }
+    ]
+  },
+  "schedule": [
+    {
+      "taskId": "a1",
+      "start": 0,
+      "end": 10
+    },
+    {
+      "taskId": "b1",
+      "start": 10,
+      "end": 20
+    },
+    {
+      "taskId": "a2",
+      "start": 10,
+      "end": 20
+    },
+    {
+      "taskId": "a3",
+      "start": 20,
+      "end": 30
+    },
+    {
+      "taskId": "b2",
+      "start": 20,
+      "end": 30
+    },
+    {
+      "taskId": "b3",
+      "start": 30,
+      "end": 40
+    }
+  ]
+}
