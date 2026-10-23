@@ -1,0 +1,27 @@
+{
+  "name": "classroom-commons",
+  "version": "0.6.0",
+  "description": "Free offline classroom workbench and portable AI Skill. No API key required.",
+  "author": "Classroom Commons contributors",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npm run build && node scripts/serve.cjs",
+    "preview": "node scripts/serve.cjs",
+    "build": "node scripts/package-skill.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "1.3.1",
+    "lucide-react": "1.61.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
