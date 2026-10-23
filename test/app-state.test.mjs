@@ -65,7 +65,8 @@ async function openApp(course, { host = false, request = null } = {}) {
   await settle();
   return {
     storage, messages, apiCalls,
-    state: () => structuredClone({ project: view.project, schedule: view.schedule, pendingId: view.pendingId, draft: view.draft, saveState: view.saveState, apiEnabled: view.apiEnabled, apiBusy: view.apiBusy, apiError: view.apiError }),
+    state: () => structuredClone({ project: view.project, schedule: view.schedule, clockRevision: view.clockRevision, pendingId: view.pendingId, draft: view.draft, saveState: view.saveState, apiEnabled: view.apiEnabled, apiBusy: view.apiBusy, apiError: view.apiError }),
+    navigate: value => view.onNavigate(value),
     action: async (...args) => { await view.onAction(...args); await settle(); },
     field: target => view.onField({ target }),
     apiField: target => view.onApiField({ target }),
@@ -92,6 +93,22 @@ async function openApp(course, { host = false, request = null } = {}) {
     async exportCourse() { await view.onAction('export'); return downloads.at(-1).blob.text(); }
   };
 }
+
+test('teaching clock resets for a newly accepted plan or edit, but not navigation or retained plans', async () => {
+  const app = await openApp(checkedCourse());
+  const originalRevision = app.state().clockRevision;
+  app.navigate('flow'); app.navigate('home'); app.navigate('flow');
+  assert.equal(app.state().clockRevision, originalRevision);
+  await app.action('solve'); app.finishUnknown();
+  assert.equal(app.state().clockRevision, originalRevision);
+  await app.action('solve'); app.finishSolver();
+  assert.equal(app.state().clockRevision, originalRevision + 1);
+  await app.action('solve'); app.finishSolver();
+  assert.equal(app.state().clockRevision, originalRevision + 2);
+  app.field({ id: 'lesson-title', value: 'A changed lesson', dataset: {} });
+  assert.equal(app.state().clockRevision, originalRevision + 3);
+  assert.deepEqual(app.state().schedule, []);
+});
 
 test('failed ordinary replanning preserves the checked schedule and exported course', async () => {
   for (const failure of ['worker', 'timeout']) {

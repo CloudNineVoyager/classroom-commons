@@ -76,6 +76,16 @@ class ReleaseTests(unittest.TestCase):
             self.assertFalse(any("__pycache__" in name for name in package.namelist()))
             self.assertEqual(package.read("classroom-commons/THIRD_PARTY_NOTICES.txt"), (ROOT / "THIRD_PARTY_NOTICES.txt").read_bytes())
 
+    def test_mission_and_maintenance_ship_with_teacher_and_source_bundles(self):
+        with zipfile.ZipFile(ROOT / "releases/Classroom-Commons-portable.zip") as teacher, zipfile.ZipFile(ROOT / "releases/Classroom-Commons-source.zip") as source:
+            for name in ("MISSION.md", "MAINTENANCE.md", "CHANGELOG.md"):
+                expected = (ROOT / name).read_bytes()
+                self.assertEqual(teacher.read(name), expected)
+                self.assertEqual(source.read("classroom-commons/" + name), expected)
+            for lang in ("en", "zh"):
+                name = "no-materials-" + lang + ".course.json"
+                self.assertEqual(teacher.read("示例课程/" + name), (ROOT / "examples" / name).read_bytes())
+
     def test_teacher_bundle_opens_with_a_plain_html_guide(self):
         with zipfile.ZipFile(ROOT / "releases/Classroom-Commons-portable.zip") as package:
             self.assertIsNone(package.testzip())
