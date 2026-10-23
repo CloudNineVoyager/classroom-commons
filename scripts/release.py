@@ -40,6 +40,8 @@ with zipfile.ZipFile(OUT / "Classroom-Commons-portable.zip", "w", zipfile.ZIP_DE
         package.write(OUT / name, "技能安装包/" + name)
     package.write(ROOT / "LICENSE", "LICENSE")
     package.write(ROOT / "THIRD_PARTY_NOTICES.txt", "THIRD_PARTY_NOTICES.txt")
+    for name in ("MISSION.md", "MAINTENANCE.md", "CHANGELOG.md"):
+        package.write(ROOT / name, name)
     for file in (ROOT / "guides").iterdir():
         if file.is_file():
             package.write(file, file.name)
@@ -48,7 +50,7 @@ with zipfile.ZipFile(OUT / "Classroom-Commons-portable.zip", "w", zipfile.ZIP_DE
             package.write(file, "示例课程/" + file.name)
 
 with zipfile.ZipFile(OUT / "Classroom-Commons-source.zip", "w", zipfile.ZIP_DEFLATED) as package:
-    for name in (".gitignore", "LICENSE", "THIRD_PARTY_NOTICES.txt", "README.md", "README.zh-CN.md", "PROJECT_STATE.md", "package.json", "package-lock.json"):
+    for name in (".gitignore", "LICENSE", "THIRD_PARTY_NOTICES.txt", "README.md", "README.zh-CN.md", "PROJECT_STATE.md", "MISSION.md", "MAINTENANCE.md", "CHANGELOG.md", "package.json", "package-lock.json"):
         package.write(ROOT / name, "classroom-commons/" + name)
     for directory in ("app", "adapters", "examples", "guides", "research", "scripts", "skills", "test"):
         for file in (ROOT / directory).rglob("*"):
