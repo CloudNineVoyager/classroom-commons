@@ -1,0 +1,7 @@
+{
+  "display_name": "课堂共作",
+  "display_name_en": "Classroom Commons",
+  "description": "课堂共作：帮助一位老师安排多个学习组、发现材料缺口，打开免费可视化备课工作台。适用于复式班、乡村课堂、材料有限的课程，不需要 API 密钥。",
+  "description_zh": "免费可视化备课：复式班排程、材料检查与替代活动建议。说“打开课堂共作”即可开始，不用配置 API。",
+  "description_en": "Free visual planning for multigrade and resource-constrained classrooms. Open Classroom Commons; no API key required."
+}
