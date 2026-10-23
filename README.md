@@ -1,12 +1,20 @@
 # Classroom Commons
 
-**Free visual planning for resource-constrained classrooms, packaged as an offline workbench and a portable AI Skill. No API key required.**
+**Classroom Commons is a free, open-source tool designed for rural and multigrade teachers worldwide, supporting offline lesson planning, multi-group classroom scheduling, material checks and live teaching mode. Core features require no account, paid subscription or API.**
 
-[简体中文](README.zh-CN.md) · 0.6.0 · Free open-source toolkit · [MIT](LICENSE)
+[简体中文](README.zh-CN.md) · 0.6.1 · Free open-source toolkit · [MIT](LICENSE)
 
 The workbench, Skills, templates and features are free and open source, with no paid tier. Original code is MIT licensed. Local planning requires no account, API key, subscription or separate client. Editing, resource checks, scheduling and export run on the teacher's computer. Optional AI drafting uses an assistant the teacher already has; that assistant controls its own charges, limits and regional availability. If it asks for payment, stop AI drafting. Existing lessons remain editable and exportable locally.
 
 Version 0.6 opens like a lesson notebook: warm paper, deep green text and small terracotta details. A real current-lesson card and four numbered modules lead into preparation. The five top-level sections are Home, Classroom, Lesson flow, Resource fit and AI assistant. The offline planning tools remain available without AI.
+
+## Who this is for and how it will stay useful
+
+We serve rural and multigrade teachers worldwide. We help organize group time, check available materials and reuse lessons; software cannot fill staffing or school funding gaps, or replace teacher judgement. The project and official updates stay free and MIT licensed, with no paid tier. Optional outside AI services may charge.
+
+Version 0.6.1 adds English/Chinese oral lesson examples requiring no shared materials. Teacher feedback, accessibility, lower-end device checks and reviewed translations guide future updates. Plans are distinct from shipped features.
+
+[Mission and limits](MISSION.md) · [Maintenance and roadmap](MAINTENANCE.md) · [Changelog](CHANGELOG.md)
 
 ![Original lesson-book home · 0.6.0](research/assets/home-0.6.0.png)
 
