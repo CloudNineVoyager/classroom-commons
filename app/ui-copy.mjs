@@ -1,5 +1,6 @@
 export const uiCopy = {
   en: {
+    clockJump: 'Start from an activity', clockJumpButton: 'Go to activity and pause', clockJumpHelp: 'Moves the clock to this activity’s scheduled start. Review every group, then continue. Saved activities and schedules stay unchanged.',
     clockTitle: 'Teach this lesson', clockHelp: 'Start after checking your schedule. Switching pages keeps the clock running; editing the lesson, replanning or reloading resets it. No sound alarm.',
     clockReady: 'Ready to start', clockRunning: 'In class', clockPaused: 'Paused', clockComplete: 'Lesson finished',
     clockStart: 'Start class', clockPause: 'Pause', clockResume: 'Continue', clockReset: 'Reset to start',
@@ -59,6 +60,7 @@ export const uiCopy = {
     apiTooLarge: 'The response is too large to read here.', apiCancelled: 'Request cancelled. Your current lesson is unchanged.',
   },
   zh: {
+    clockJump: '从指定活动继续', clockJumpButton: '定位并暂停', clockJumpHelp: '将计时定位到所选活动的排程开始时间。先核对各组安排，再继续上课；不会修改已保存的活动和排程。',
     clockTitle: '上课模式', clockHelp: '检查排程后开始。切换页面继续计时；编辑课程、重新排程或刷新页面会重置。不发出声音提醒。',
     clockReady: '准备上课', clockRunning: '上课中', clockPaused: '已暂停', clockComplete: '本节课结束',
     clockStart: '开始上课', clockPause: '暂停', clockResume: '继续上课', clockReset: '归零重置',
@@ -118,6 +120,7 @@ export const uiCopy = {
     apiTooLarge: '服务返回的内容太大，暂时无法读取。', apiCancelled: '请求已取消，当前课程保持原样。',
   },
   es: {
+    clockJump: 'Empezar desde una actividad', clockJumpButton: 'Ir a la actividad y pausar', clockJumpHelp: 'Sitúa el reloj al inicio programado de esta actividad. Revisa todos los grupos y continúa. Las actividades y el horario guardados no cambian.',
     clockTitle: 'Dar esta clase', clockHelp: 'Revisa el horario antes de empezar. Cambiar de página mantiene el reloj; editar, replanificar o recargar lo reinicia. Sin alarma sonora.',
     clockReady: 'Lista para empezar', clockRunning: 'En clase', clockPaused: 'En pausa', clockComplete: 'Clase terminada',
     clockStart: 'Iniciar clase', clockPause: 'Pausar', clockResume: 'Continuar', clockReset: 'Volver a cero',
@@ -177,6 +180,7 @@ export const uiCopy = {
     apiTooLarge: 'La respuesta es demasiado grande.', apiCancelled: 'Solicitud cancelada. La clase actual no ha cambiado.',
   },
   ar: {
+    clockJump: 'المتابعة من نشاط محدد', clockJumpButton: 'الانتقال إلى النشاط والإيقاف مؤقتًا', clockJumpHelp: 'ينتقل المؤقت إلى وقت البدء المجدول للنشاط. راجع جميع المجموعات ثم تابع. لا تتغير الأنشطة أو الجداول المحفوظة.',
     clockTitle: 'تقديم هذا الدرس', clockHelp: 'راجع الجدول قبل البدء. يستمر المؤقت عند تغيير الصفحة؛ ويُعاد ضبطه عند تعديل الدرس أو الجدول أو إعادة تحميل الصفحة. دون تنبيه صوتي.',
     clockReady: 'جاهز للبدء', clockRunning: 'الدرس جارٍ', clockPaused: 'متوقف مؤقتًا', clockComplete: 'انتهى الدرس',
     clockStart: 'بدء الدرس', clockPause: 'إيقاف مؤقت', clockResume: 'متابعة', clockReset: 'إعادة إلى الصفر',

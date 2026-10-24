@@ -2,7 +2,7 @@ import { createElement as h, createContext, useContext, useEffect, useRef, useSt
 import * as Modal from '@radix-ui/react-dialog';
 import { Icon } from './icons.mjs';
 import logo from './logo.svg';
-import { elapsedSeconds, pauseClock, resumeClock, formatClock, lessonSnapshot } from './lesson-clock.mjs';
+import { elapsedSeconds, pauseClock, resumeClock, clockAtActivity, formatClock, lessonSnapshot } from './lesson-clock.mjs';
 
 const Context = createContext(null);
 const useUI = () => useContext(Context);
@@ -198,6 +198,7 @@ function LessonClock() {
   const { project, schedule, lang, u, t, n } = useUI();
   const [clock, setClock] = useState({ elapsed: 0, since: null });
   const [now, setNow] = useState(() => performance.now());
+  const [jumpTaskId, setJumpTaskId] = useState(schedule[0]?.taskId || '');
   const view = lessonSnapshot(project, schedule, elapsedSeconds(clock, now));
   const running = clock.since != null && !view.complete;
   useEffect(() => {
@@ -222,6 +223,13 @@ function LessonClock() {
       h('div', { className: 'clock-controls' }, h('div', null, h('span', { className: 'clock-digits', role: 'timer', 'aria-label': u('clockElapsed'), dir: 'ltr' }, formatClock(view.seconds, lang)), h('small', { className: 'muted' }, `${u('clockRemaining')} ${formatClock(Math.ceil(view.remaining), lang)}`)),
         h('div', { className: 'button-row' }, h(Button, { variant: 'primary', onClick: toggle, disabled: view.complete, 'data-clock': 'toggle', icon: 'clock' }, u(running ? 'clockPause' : clock.elapsed > 0 ? 'clockResume' : 'clockStart')), h(Button, { onClick: () => { setClock({ elapsed: 0, since: null }); setNow(performance.now()); }, 'data-clock': 'reset' }, u('clockReset')))),
       h('progress', { className: 'clock-progress', value: view.seconds, max: project.duration * 60, 'aria-label': u('clockElapsed') }),
+      h('div', { className: 'clock-jump' },
+        h(Field, { label: u('clockJump'), as: 'select', id: 'clock-jump-task', value: jumpTaskId, onChange: event => setJumpTaskId(event.target.value) }, [...schedule].sort((a, b) => a.start - b.start || a.end - b.end).map(slot => {
+          const activity = project.tasks.find(task => task.id === slot.taskId);
+          return h('option', { key: slot.taskId, value: slot.taskId }, `${n(slot.start)} ${t('min')} · ${project.groups.find(group => group.id === activity.groupId).name} · ${activity.title}`);
+        })),
+        h(Button, { 'data-clock': 'jump', onClick: () => { const target = clockAtActivity(schedule, jumpTaskId); if (target) { setClock(target); setNow(performance.now()); } } }, u('clockJumpButton'))),
+      h('p', { className: 'field-help' }, u('clockJumpHelp')),
       h('div', { className: 'clock-focus', role: 'status' }, h('strong', null, view.complete ? u('clockComplete') : view.teacher ? `${u('clockTeacher')} ${view.teacher.group.name}` : u('clockObserve')), !view.complete && view.nextChange != null && h('span', null, `${u('clockChange')} ${formatClock(Math.ceil(view.nextChange), lang)}`)),
       h('div', { className: 'clock-groups' }, view.groups.map(item => h('article', { className: `clock-group ${item.task?.mode === 'teacher' ? 'with-teacher' : ''}`, key: item.group.id },
         h('div', { className: 'clock-group-heading' }, h('h3', null, item.group.name), item.task && h(Badge, null, t(item.task.mode))),
@@ -316,5 +324,5 @@ export function Dialog() {
 export function Workbench(props) {
   const { t, u, tab, hostLoading, onFile } = props;
   const clockKey = JSON.stringify([props.clockRevision, props.project, props.schedule]);
-  return h(Context.Provider, { value: props }, h('div', { className: `app-shell ${tab === 'home' ? 'is-home' : ''}` }, h('a', { className: 'skip-link', href: '#main-content', onClick: event => { event.preventDefault(); const main = document.querySelector('#main-content'); main.focus({ preventScroll: true }); main.scrollIntoView({ block: 'start' }); } }, u('workspace')), h(AppHeader), h('div', { className: 'workspace' }, tab !== 'home' && h(Topbar), h('main', { id: 'main-content', tabIndex: -1, className: tab === 'home' ? 'home-main' : '' }, h('fieldset', { disabled: hostLoading, className: 'workbench-fieldset', 'aria-busy': hostLoading }, tab !== 'home' && h(Toolbar), h('div', { hidden: tab !== 'flow' }, h(LessonClock, { key: clockKey })), h(({ home: HomePortal, overview: Overview, flow: Flow, fit: Fit, ai: AI })[tab]))), h('footer', null, h('span', null, 'Classroom Commons · v0.6.1'), h('span', null, t('free')))), h('input', { id: 'file-input', type: 'file', accept: '.json,application/json', hidden: true, onChange: onFile }), h(Dialog)));
+  return h(Context.Provider, { value: props }, h('div', { className: `app-shell ${tab === 'home' ? 'is-home' : ''}` }, h('a', { className: 'skip-link', href: '#main-content', onClick: event => { event.preventDefault(); const main = document.querySelector('#main-content'); main.focus({ preventScroll: true }); main.scrollIntoView({ block: 'start' }); } }, u('workspace')), h(AppHeader), h('div', { className: 'workspace' }, tab !== 'home' && h(Topbar), h('main', { id: 'main-content', tabIndex: -1, className: tab === 'home' ? 'home-main' : '' }, h('fieldset', { disabled: hostLoading, className: 'workbench-fieldset', 'aria-busy': hostLoading }, tab !== 'home' && h(Toolbar), h('div', { hidden: tab !== 'flow' }, h(LessonClock, { key: clockKey })), h(({ home: HomePortal, overview: Overview, flow: Flow, fit: Fit, ai: AI })[tab]))), h('footer', null, h('span', null, 'Classroom Commons · v0.6.2'), h('span', null, t('free')))), h('input', { id: 'file-input', type: 'file', accept: '.json,application/json', hidden: true, onChange: onFile }), h(Dialog)));
 }

@@ -10,6 +10,11 @@ export function resumeClock(clock, now) {
   return clock.since == null ? { elapsed: clock.elapsed, since: now } : clock;
 }
 
+export function clockAtActivity(schedule, taskId) {
+  const slot = schedule.find(item => item.taskId === taskId);
+  return slot ? { elapsed: slot.start * 60, since: null } : null;
+}
+
 export function formatClock(seconds, lang = 'en') {
   const whole = Math.max(0, Math.floor(seconds));
   const digits = new Intl.NumberFormat(lang, { minimumIntegerDigits: 2, useGrouping: false });
