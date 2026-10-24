@@ -1,5 +1,13 @@
 # Changelog / 更新记录
 
+## 0.6.2 — 2026-10-24
+
+- 上课模式新增“从指定活动继续”：按时间、学习组和活动名选择，定位到活动的排程开始时间。
+- 定位后自动暂停；核对各组当前活动、老师指导组和剩余时间，再点“继续上课”。可前进跳过已完成阶段，也可返回较早活动。
+- 定位同步更新所有组，不修改活动、课程文件或原排程。中、英、西、阿四语均可离线使用。
+
+English: teaching mode can now jump to any scheduled activity. Choose by time, group and activity; the clock pauses at its scheduled start and updates every group. Review the classroom before continuing. Jump forwards or backwards without changing saved activities or schedules. Available offline in all four interface languages.
+
 ## 0.6.1 — 2026-10-23
 
 - 新增离线上课模式：基于已有课堂排程开始计时，支持暂停、继续、归零和下课自动停止。
