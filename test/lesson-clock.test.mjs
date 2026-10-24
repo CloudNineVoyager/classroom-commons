@@ -1,11 +1,44 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { elapsedSeconds, pauseClock, resumeClock, formatClock, lessonSnapshot } from '../app/lesson-clock.mjs';
+import { elapsedSeconds, pauseClock, resumeClock, clockAtActivity, formatClock, lessonSnapshot } from '../app/lesson-clock.mjs';
 import { checkSchedule } from '../app/engine.mjs';
 
 const course = JSON.parse(await readFile(new URL('../examples/no-materials-en.course.json', import.meta.url), 'utf8'));
 const { project, schedule } = course;
+
+test('jumping to a teacher activity pauses exactly at its scheduled start', () => {
+  const clock = clockAtActivity(schedule, 't3');
+  assert.deepEqual(clock, { elapsed: 300, since: null });
+  const view = lessonSnapshot(project, schedule, clock.elapsed);
+  assert.equal(view.teacher.task.id, 't3');
+  assert.equal(view.groups.find(item => item.group.id === 'g1').task.id, 't1');
+});
+
+test('jumping to an independent activity updates all simultaneous groups', () => {
+  const clock = clockAtActivity(schedule, 't4');
+  const view = lessonSnapshot(project, schedule, clock.elapsed);
+  assert.equal(view.groups.find(item => item.group.id === 'g2').task.id, 't4');
+  assert.equal(view.teacher.task.id, 't2');
+});
+
+test('a located activity stays paused until explicitly resumed', () => {
+  const clock = clockAtActivity(schedule, 't3');
+  assert.equal(elapsedSeconds(clock, 900000), 300);
+  assert.equal(elapsedSeconds(resumeClock(clock, 900000), 901000), 301);
+});
+
+test('a clock can jump back to the beginning and rejects an unknown activity', () => {
+  assert.deepEqual(clockAtActivity(schedule, 't0'), { elapsed: 0, since: null });
+  assert.equal(clockAtActivity(schedule, 'missing'), null);
+  assert.equal(clockAtActivity([], 't0'), null);
+});
+
+test('jumping never changes the saved course or its schedule', () => {
+  const before = JSON.stringify(course);
+  for (const slot of schedule) clockAtActivity(schedule, slot.taskId);
+  assert.equal(JSON.stringify(course), before);
+});
 
 test('lesson clock measures timestamps instead of counting timer callbacks', () => {
   const clock = resumeClock({ elapsed: 0, since: null }, 1000);
