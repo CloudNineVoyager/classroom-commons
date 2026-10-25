@@ -3,7 +3,47 @@ import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 import { demo } from '../app/demo.mjs';
 import { solve, adoptAlternative, validateProject, checkSchedule, auditResources } from '../app/engine.mjs';
-import { writeCourseFile, readCourseFile } from '../app/project-file.mjs';
+import { writeCourseFile, readCourseFile, duplicateActivity } from '../app/project-file.mjs';
+
+test('duplicate activity inserts an independent copy directly after the original', () => {
+  const project = demo('zh'), before = JSON.stringify(project);
+  const source = project.tasks[1];
+  const copy = duplicateActivity(project, source.id, 'copied-activity');
+  assert.equal(JSON.stringify(project), before);
+  assert.deepEqual(copy.tasks[2], { ...source, id: 'copied-activity' });
+  copy.tasks[2].title = 'Changed copy';
+  copy.tasks[2].after.push(project.tasks[0].id);
+  assert.notEqual(copy.tasks[1].title, copy.tasks[2].title);
+  assert.deepEqual(copy.tasks[1].after, source.after);
+});
+
+test('copied materials and alternative activities do not share mutable data', () => {
+  const project = demo(), source = project.tasks.find(task => task.id === 'b2');
+  const copy = duplicateActivity(project, source.id, 'new-b2');
+  const task = copy.tasks.find(task => task.id === 'new-b2');
+  task.needs[0].quantity = 99;
+  task.alternative.title = 'Another approach';
+  assert.deepEqual(copy.tasks.find(task => task.id === 'b2'), source);
+  assert.deepEqual(project.tasks.find(task => task.id === 'b2'), source);
+});
+
+test('duplicate activity rejects unknown or reused identities and the activity limit', () => {
+  const project = demo();
+  assert.throws(() => duplicateActivity(project, 'missing', 'new'), /invalidProject/);
+  assert.throws(() => duplicateActivity(project, project.tasks[0].id, project.tasks[1].id), /invalidProject/);
+  assert.throws(() => duplicateActivity(project, project.tasks[0].id, ''), /invalidProject/);
+  const full = structuredClone(project);
+  full.tasks = Array.from({ length: 24 }, (_, i) => ({ ...structuredClone(project.tasks[0]), id: `task-${i}`, after: [] }));
+  assert.throws(() => duplicateActivity(full, 'task-0', 'overflow'), /invalidProject/);
+});
+
+test('copied unfinished activities and dependencies survive a saved-course round trip', () => {
+  const project = demo(); project.tasks[1].objective = ''; project.tasks[1].duration = null;
+  const copy = duplicateActivity(project, project.tasks[1].id, 'unfinished-copy');
+  const restored = readCourseFile(writeCourseFile(copy));
+  assert.deepEqual(restored.project, copy);
+  assert.equal(restored.project.tasks[2].duration, null);
+});
 
 test('saved course preserves the checked schedule and reviewed alternatives', () => {
   const p = adoptAlternative(demo('zh'), 'b2', true), result = solve(p);

@@ -110,6 +110,22 @@ test('teaching clock resets for a newly accepted plan or edit, but not navigatio
   assert.deepEqual(app.state().schedule, []);
 });
 
+test('duplicating an activity clears stale schedules and saves the independent copy', async () => {
+  const course = checkedCourse(), app = await openApp(course);
+  const before = app.state();
+  await app.action('duplicate-task', course.project.tasks[0].id);
+  const after = app.state();
+  assert.equal(after.project.tasks.length, before.project.tasks.length + 1);
+  assert.notEqual(after.project.tasks[0].id, after.project.tasks[1].id);
+  assert.deepEqual(after.project.tasks[1], { ...after.project.tasks[0], id: after.project.tasks[1].id });
+  assert.deepEqual(after.schedule, []);
+  assert.equal(after.clockRevision, before.clockRevision + 1);
+  const restored = courseFiles.readCourseFile(await app.exportCourse());
+  assert.deepEqual(restored.project, after.project);
+  assert.deepEqual(restored.schedule, []);
+  assert.ok(app.messages.includes(uiTranslate('en', 'activityCopied')));
+});
+
 test('failed ordinary replanning preserves the checked schedule and exported course', async () => {
   for (const failure of ['worker', 'timeout']) {
     const course = checkedCourse(), app = await openApp(course);

@@ -43,3 +43,15 @@ test('offline distribution embeds the complete bundled software notices', async 
   assert.equal(embedded, notices.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;'));
   for (const name of ['react ', 'react-dom ', 'lucide-react ', '@radix-ui/react-dialog ']) assert.ok(notices.includes(name), name);
 });
+
+test('offline typography ships every font and its OFL notice without font downloads', async () => {
+  const html = await readFile(new URL('../releases/Classroom-Commons.html', import.meta.url), 'utf8');
+  for (const name of ['classroom-text-regular', 'classroom-text-medium', 'classroom-text-bold', 'classroom-display']) {
+    const bytes = await readFile(new URL(`../app/fonts/${name}.woff2`, import.meta.url));
+    assert.equal(bytes.subarray(0, 4).toString(), 'wOF2');
+    assert.ok(html.includes(`data:font/woff2;base64,${bytes.toString('base64')}`));
+  }
+  assert.ok(html.includes('font-src data:'));
+  assert.equal(html.includes("url('fonts/"), false);
+  assert.ok(html.includes('SIL OPEN FONT LICENSE Version 1.1'));
+});
