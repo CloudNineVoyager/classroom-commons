@@ -39,16 +39,22 @@ for (const name of names) {
   if (!license) throw new Error(`Missing distribution license: ${name}`);
   notices += `${name} ${metadata.version} (${metadata.license})\n${license.trim()}\n\n`;
 }
+notices += `Classroom Text / Classroom Display — OFL-1.1 font subsets\n${await read('fonts/OFL.txt')}\n`;
 await writeFile(path.join(root, 'THIRD_PARTY_NOTICES.txt'), notices);
 const script = (`window.CLASSROOM_WORKER_SOURCE=${JSON.stringify(worker.outputFiles[0].text)};\n${bundled.outputFiles[0].text}`)
   .replaceAll('</script', '<\\/script').replace(/\r\n?/g, '\n');
 const hash = createHash('sha256').update(script).digest('base64');
 const logo = 'data:image/svg+xml;base64,' + Buffer.from(await read('logo.svg')).toString('base64');
 const escape = text => text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+let styles = await read('style.css') + '\n' + await read('studio.css');
+for (const name of ['classroom-text-regular', 'classroom-text-medium', 'classroom-text-bold', 'classroom-display']) {
+  const bytes = await readFile(path.join(root, 'app/fonts', name + '.woff2'));
+  styles = styles.replaceAll(`url('fonts/${name}.woff2')`, `url('data:font/woff2;base64,${bytes.toString('base64')}')`);
+}
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-${hash}'; style-src 'unsafe-inline'; img-src data:; connect-src 'self' https: http://127.0.0.1:* http://localhost:*; worker-src blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'none'">
-<meta name="theme-color" content="#f7f6f2"><title>Classroom Commons</title><link rel="icon" href="${logo}"><style>${await read('style.css')}</style></head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-${hash}'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'self' https: http://127.0.0.1:* http://localhost:*; worker-src blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'none'">
+<meta name="theme-color" content="#f7f6f2"><title>Classroom Commons</title><link rel="icon" href="${logo}"><style>${styles}</style></head>
 <body><div id="app"></div><div id="toast" role="status" aria-live="polite"></div><template id="third-party-notices">${escape(notices)}</template><script>${script}</script></body></html>`;
 await mkdir(path.join(root, 'releases'), { recursive: true });
 await writeFile(path.join(root, 'releases', 'Classroom-Commons.html'), html);
