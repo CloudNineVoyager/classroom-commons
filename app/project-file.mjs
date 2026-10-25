@@ -43,6 +43,14 @@ export function editableProject(raw) {
   };
 }
 
+export function duplicateActivity(project, taskId, newId) {
+  const copy = editableProject(project);
+  const index = copy.tasks.findIndex(task => task.id === taskId);
+  fileCheck(index >= 0 && copy.tasks.length < 24 && fileText(newId) && newId.length > 0 && !copy.tasks.some(task => task.id === newId));
+  copy.tasks.splice(index + 1, 0, { ...structuredClone(copy.tasks[index]), id: newId });
+  return copy;
+}
+
 export function readCourseFile(input) {
   if (new TextEncoder().encode(input).length > 1000000) throw new Error('tooLarge');
   const raw = JSON.parse(input.replace(/^\uFEFF/, ''));

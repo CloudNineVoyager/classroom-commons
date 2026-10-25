@@ -5,7 +5,7 @@ import { Workbench } from './ui.mjs';
 import { uiTranslate } from './ui-copy.mjs';
 import { requestApiDraft } from './api-client.mjs';
 import { auditResources, adoptAlternative, parseAssistantReply, parseAssistantProject, checkSchedule, validateProject } from './engine.mjs';
-import { editableProject, readCourseFile, writeCourseFile } from './project-file.mjs';
+import { editableProject, duplicateActivity, readCourseFile, writeCourseFile } from './project-file.mjs';
 import { demo } from './demo.mjs';
 import { languages, translate } from './i18n.mjs';
 
@@ -295,6 +295,12 @@ async function action(name, itemId) {
       project.resources = project.resources.filter(r => r.id !== itemId); changed();
     }
     if (name === 'add-task') { if (project.tasks.length >= 24) return; project.tasks.push({ id: id('activity'), title: t('newTask'), objective: t('newObjective'), groupId: project.groups[0].id, duration: 5, mode: 'teacher', requiresReading: false, after: [], needs: [], alternative: null }); changed(); }
+    if (name === 'duplicate-task') {
+      if (project.tasks.length >= 24) return;
+      const copyId = id('activity'); project = duplicateActivity(project, itemId, copyId); changed();
+      const title = document.querySelector(`[data-kind="task"][data-id="${copyId}"][data-field="title"]`);
+      title?.focus?.(); title?.select?.(); toast(u('activityCopied'));
+    }
     if (name === 'remove-task') { project.tasks = project.tasks.filter(a => a.id !== itemId); for (const a of project.tasks) a.after = a.after.filter(id => id !== itemId); changed(); }
     if (name === 'solve') runSolver('solve');
     if (name === 'delay') runSolver('replan', delayTask || schedule[0]?.taskId, delayMinutes);

@@ -41,7 +41,7 @@ function AppHeader() {
   const { t, u, tab, lang, languages, onField, onNavigate } = useUI();
   const navLabel = key => lang === 'zh' ? t(key) : u({ overview: 'navClassroom', flow: 'navFlow', fit: 'navMaterials', ai: 'navAssistant' }[key]);
   return h('header', { className: 'app-header' }, h('button', { type: 'button', className: 'brand', onClick: () => onNavigate('home'), 'aria-label': u('home') }, h('img', { src: logo, alt: '' }), h('span', null, h('strong', null, u('brandName')), h('small', null, u('brandCaption')))),
-    h('nav', { 'aria-label': u('workspace') }, ['home', 'overview', 'flow', 'fit', 'ai'].map(key => h('button', { type: 'button', className: `nav ${tab === key ? 'active' : ''}`, 'aria-current': tab === key ? 'page' : undefined, key, onClick: () => onNavigate(key) }, h('span', null, key === 'home' ? u('home') : navLabel(key))))),
+    h('nav', { 'aria-label': u('workspace') }, ['home', 'overview', 'flow', 'fit', 'ai'].map(key => h('button', { type: 'button', className: `nav ${tab === key ? 'active' : ''}`, 'aria-current': tab === key ? 'page' : undefined, key, onClick: () => onNavigate(key) }, h(Icon, { name: key === 'home' ? 'book' : key, size: 19 }), h('span', null, key === 'home' ? u('home') : navLabel(key))))),
     h('div', { className: 'header-tools' }, h('span', { className: 'header-free' }, h(Icon, { name: 'shield', size: 13 }), u('localWork')),
       h('label', { className: 'language-field' }, h('span', { className: 'sr-only' }, 'Language'), h('select', { id: 'language', value: lang, 'aria-label': 'Language', onChange: onField }, Object.entries(languages).map(([key, name]) => h('option', { key, value: key }, name))))));
 }
@@ -60,14 +60,15 @@ function HomePortal() {
     { id: 'ai', title: t('ai'), help: u('homeAIHelp'), detail: u('portalAI') },
   ];
   return h('div', { className: 'home-portal' },
+    h('div', { className: 'portal-masthead' }, h('h2', null, u('workspace')), h('span', null, h(Icon, { name: 'offline', size: 14 }), u('localWork'))),
     h('div', { className: 'portal-hero' },
-      h('div', { className: 'portal-intro' }, h('p', { className: 'portal-eyebrow' }, u('homeKicker')),
-        h('h1', null, h('span', null, u('heroFirst')), h('span', null, u('heroSecond'))), h('p', null, u('heroDescription')),
-        h('div', { className: 'portal-actions' }, h(Button, { variant: 'primary', icon: 'next', onClick: () => onNavigate('overview') }, u('homeStart')), h(Button, { action: 'open', icon: 'open', variant: 'ghost' }, u('homeOpen'))),
+      h('div', { className: 'portal-intro' }, h('p', { className: 'portal-eyebrow' }, u('course')),
+        h('h1', null, p.title || u('untitled')), h('p', { className: 'portal-course-facts' }, `${n(p.duration || 0)} ${t('min')} / ${n(p.groups.length)} ${t('groups')} / ${n(p.tasks.length)} ${t('tasks')}`), h('p', null, u('homeClassroomHelp')),
+        h('div', { className: 'portal-actions' }, h(Button, { variant: 'primary', icon: 'next', onClick: () => onNavigate('overview') }, p.title ? u('homeEdit') : u('homeStart')), h(Button, { action: 'open', icon: 'open', variant: 'ghost' }, u('homeOpen'))),
         h('p', { className: 'portal-reassurance' }, h(Icon, { name: 'shield', size: 14 }), t('noAI'))),
       h(Card, { className: 'lesson-preview' },
         h('div', { className: 'preview-topline' }, h('span', null, u('courseResume')), h('span', { className: 'preview-time' }, h(Icon, { name: 'clock', size: 14 }), `${p.duration == null ? '—' : n(p.duration)} ${t('min')}`)),
-        h('h2', null, p.title || u('untitled')),
+        h('h2', null, t('groups')),
         h('div', { className: 'preview-groups' }, p.groups.slice(0, 3).map((group, i) => {
           const activities = p.tasks.filter(task => task.groupId === group.id);
           return h('div', { key: group.id, className: 'preview-group' }, h('span', { className: `preview-mark color-${i}` }, String.fromCharCode(65 + i)),
@@ -126,7 +127,7 @@ function Summary() {
   return h(Card, { className: 'summary-card' }, h('h2', null, u('summary')), h('div', { className: 'summary-metrics' }, items.map(item => h('div', { key: item.label }, h(Icon, { name: item.icon, size: 17 }), h('strong', null, typeof item.value === 'number' ? n(item.value) : item.value), h('span', null, item.label)))), h('div', { className: 'summary-footer' }, h(Icon, { name: 'shield', size: 15 }), u('support')));
 }
 function Tasks() {
-  const { project: p, t, n } = useUI();
+  const { project: p, t, u, n } = useUI();
   const attrs = (activity, field) => ({ 'data-kind': 'task', 'data-id': activity.id, 'data-field': field });
   return h('div', { className: 'task-grid' }, p.tasks.map((a, i) => h(Card, { key: a.id, className: 'task-card' },
     h('div', { className: 'task-top' }, h('span', { className: 'task-number' }, n(i + 1)), h(Field, { label: t('activity'), value: a.title, maxLength: 200, className: 'task-title', ...attrs(a, 'title') }), h(Button, { action: 'remove-task', itemId: a.id, icon: 'remove', variant: 'icon-only', 'aria-label': `${t('remove')} · ${a.title}` })),
@@ -137,7 +138,8 @@ function Tasks() {
       h(Field, { label: t('objective'), as: 'textarea', rows: 2, value: a.objective, maxLength: 2000, ...attrs(a, 'objective') }),
       h(Check, { checked: a.requiresReading, ...attrs(a, 'requiresReading') }, t('reading')),
       h('p', { className: 'mini-label' }, t('needs')), h('div', { className: 'needs-grid' }, p.resources.length ? p.resources.map(r => { const need = a.needs.find(x => x.resourceId === r.id); return h(Field, { key: r.id, label: r.name, value: need ? need.quantity : 0, type: 'number', min: 0, max: 100000, 'data-need': r.id, 'data-task': a.id }); }) : h('small', null, t('none'))),
-      h('p', { className: 'mini-label' }, t('after')), h('div', { className: 'dependencies' }, p.tasks.filter(other => other.id !== a.id).map(other => h(Check, { key: other.id, 'data-after': other.id, 'data-task': a.id, checked: a.after.includes(other.id) }, other.title)))))));
+      h('p', { className: 'mini-label' }, t('after')), h('div', { className: 'dependencies' }, p.tasks.filter(other => other.id !== a.id).map(other => h(Check, { key: other.id, 'data-after': other.id, 'data-task': a.id, checked: a.after.includes(other.id) }, other.title)))),
+    h(Button, { action: 'duplicate-task', itemId: a.id, icon: 'copy', variant: 'ghost', disabled: p.tasks.length >= 24, 'aria-label': `${u('duplicateActivity')} · ${a.title}` }, u('duplicateActivity')))));
 }
 function ActivityDetails({ activity, slot, project, open, onOpenChange, trigger }) {
   const { t, u, n } = useUI();
@@ -324,5 +326,5 @@ export function Dialog() {
 export function Workbench(props) {
   const { t, u, tab, hostLoading, onFile } = props;
   const clockKey = JSON.stringify([props.clockRevision, props.project, props.schedule]);
-  return h(Context.Provider, { value: props }, h('div', { className: `app-shell ${tab === 'home' ? 'is-home' : ''}` }, h('a', { className: 'skip-link', href: '#main-content', onClick: event => { event.preventDefault(); const main = document.querySelector('#main-content'); main.focus({ preventScroll: true }); main.scrollIntoView({ block: 'start' }); } }, u('workspace')), h(AppHeader), h('div', { className: 'workspace' }, tab !== 'home' && h(Topbar), h('main', { id: 'main-content', tabIndex: -1, className: tab === 'home' ? 'home-main' : '' }, h('fieldset', { disabled: hostLoading, className: 'workbench-fieldset', 'aria-busy': hostLoading }, tab !== 'home' && h(Toolbar), h('div', { hidden: tab !== 'flow' }, h(LessonClock, { key: clockKey })), h(({ home: HomePortal, overview: Overview, flow: Flow, fit: Fit, ai: AI })[tab]))), h('footer', null, h('span', null, 'Classroom Commons · v0.6.2'), h('span', null, t('free')))), h('input', { id: 'file-input', type: 'file', accept: '.json,application/json', hidden: true, onChange: onFile }), h(Dialog)));
+  return h(Context.Provider, { value: props }, h('div', { className: `app-shell ${tab === 'home' ? 'is-home' : ''}` }, h('a', { className: 'skip-link', href: '#main-content', onClick: event => { event.preventDefault(); const main = document.querySelector('#main-content'); main.focus({ preventScroll: true }); main.scrollIntoView({ block: 'start' }); } }, u('workspace')), h(AppHeader), h('div', { className: 'workspace' }, tab !== 'home' && h(Topbar), h('main', { id: 'main-content', tabIndex: -1, className: tab === 'home' ? 'home-main' : '' }, h('fieldset', { disabled: hostLoading, className: 'workbench-fieldset', 'aria-busy': hostLoading }, tab !== 'home' && h(Toolbar), h('div', { hidden: tab !== 'flow' }, h(LessonClock, { key: clockKey })), h(({ home: HomePortal, overview: Overview, flow: Flow, fit: Fit, ai: AI })[tab]))), h('footer', null, h('span', null, 'Classroom Commons · v0.6.3'), h('span', null, t('free')))), h('input', { id: 'file-input', type: 'file', accept: '.json,application/json', hidden: true, onChange: onFile }), h(Dialog)));
 }
