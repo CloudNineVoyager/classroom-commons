@@ -1,5 +1,15 @@
 # Changelog / 更新记录
 
+## 0.6.3 — 2026-10-24
+
+- 重做工作台排版：以真实课程名为主标题，分开课程信息、学习组摘要和工具入口；桌面浅色导航、移动端顶部导航，统一表单和控件。
+- 内嵌开源中文宋体标题与三种黑体字重，恢复正常中文间距；移除宣传标语、大色块和卡片装饰。保留克制的交互反馈和减少动画支持，字体无需联网或安装。
+- 新增“复制活动”：在原活动下方生成具有独立ID的副本，保留组别、时长、目标、材料、前置活动与替代方案，可单独修改。
+- 复制后自动选中副本名称，方便立即重命名；清除旧排程并重置上课计时，要求重新生成排程。
+- 达到24项活动时禁用复制；四种界面语言均可离线使用，不依赖AI或API。
+
+English: redesigned course-centered typography and navigation, with embedded OFL serif/sans font subsets, normal Chinese spacing, responsive and RTL layouts. Duplicate a teaching activity below the original with independent data, retaining its settings, materials, prerequisites and alternative. Focus moves to the copy title; old schedules and lesson clocks reset for replanning. The 24-activity limit applies. Available offline in all four interface languages.
+
 ## 0.6.2 — 2026-10-24
 
 - 上课模式新增“从指定活动继续”：按时间、学习组和活动名选择，定位到活动的排程开始时间。
