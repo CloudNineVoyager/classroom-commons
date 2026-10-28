@@ -8,6 +8,7 @@ import * as courseFiles from '../app/project-file.mjs';
 import * as examples from '../app/demo.mjs';
 import * as translations from '../app/i18n.mjs';
 import { uiTranslate } from '../app/ui-copy.mjs';
+import { groupSheetsHTML } from '../app/group-sheets.mjs';
 
 // Run the real controller and domain modules. Only React rendering, browser
 // services and the asynchronous Worker/bridge transport are replaced.
@@ -32,7 +33,7 @@ async function openApp(course, { host = false, request = null } = {}) {
     static revokeObjectURL() {}
   }
   const context = vm.createContext({
-    ...engine, ...courseFiles, ...examples, ...translations, uiTranslate,
+    ...engine, ...courseFiles, ...examples, ...translations, uiTranslate, groupSheetsHTML,
     requestApiDraft: async config => { apiCalls.push(config); return apiTransport(config); },
     createElement: (type, props) => ({ type, props }),
     createRoot: () => ({ render(element) { view = element.props; } }),
@@ -64,7 +65,7 @@ async function openApp(course, { host = false, request = null } = {}) {
   new vm.Script(source, { filename: appUrl.pathname }).runInContext(context);
   await settle();
   return {
-    storage, messages, apiCalls,
+    storage, messages, apiCalls, downloads,
     state: () => structuredClone({ project: view.project, schedule: view.schedule, clockRevision: view.clockRevision, pendingId: view.pendingId, draft: view.draft, saveState: view.saveState, apiEnabled: view.apiEnabled, apiBusy: view.apiBusy, apiError: view.apiError }),
     navigate: value => view.onNavigate(value),
     action: async (...args) => { await view.onAction(...args); await settle(); },
@@ -108,6 +109,35 @@ test('teaching clock resets for a newly accepted plan or edit, but not navigatio
   app.field({ id: 'lesson-title', value: 'A changed lesson', dataset: {} });
   assert.equal(app.state().clockRevision, originalRevision + 3);
   assert.deepEqual(app.state().schedule, []);
+});
+
+test('group sheet export uses current language and paper without altering the lesson or clock', async () => {
+  const app = await openApp(checkedCourse());
+  app.field({ id: 'language', value: 'ar', dataset: {} });
+  app.field({ id: 'paper', value: 'Letter', dataset: {} });
+  const before = app.state(), saved = app.storage.get('cc-course');
+  await app.action('group-sheets');
+  const download = app.downloads.at(-1);
+  assert.ok(download.filename.endsWith('-groups.html'));
+  assert.equal(download.blob.type, 'text/html;charset=utf-8');
+  const html = await download.blob.text();
+  assert.ok(html.includes('lang="ar" dir="rtl"'));
+  assert.ok(html.includes('@page{size:Letter;'));
+  assert.deepEqual(app.state(), before);
+  assert.equal(app.storage.get('cc-course'), saved);
+  assert.equal(app.apiCalls.length, 0);
+});
+
+test('editing a lesson blocks group sheet export until it is checked again', async () => {
+  const app = await openApp(checkedCourse());
+  app.field({ id: 'lesson-title', value: 'Changed lesson', dataset: {} });
+  await app.action('group-sheets');
+  assert.equal(app.downloads.length, 0);
+  assert.ok(app.messages.includes(uiTranslate('en', 'groupSheetsNotReady')));
+  await app.action('solve'); app.finishSolver();
+  await app.action('group-sheets');
+  assert.equal(app.downloads.length, 1);
+  assert.ok((await app.downloads[0].blob.text()).includes('Changed lesson'));
 });
 
 test('duplicating an activity clears stale schedules and saves the independent copy', async () => {
