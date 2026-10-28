@@ -1,5 +1,14 @@
 # Changelog / 更新记录
 
+## 0.6.4 — 2026-10-28 (prepared 2026-10-25)
+
+- 新增离线分组任务单：从通过检查的排程生成HTML，各学习组单独整理并按实际时间排序，显示时间段、目标、材料数量、指导方式、前置活动及已采纳的调整说明。
+- 每项活动附纸面完成勾选框；打印时每组另起一页，长内容可跨页，支持A4 / Letter及浏览器另存PDF。
+- 不会独立阅读的学习组显示教师口头讲解和示范提示。中、英、西、阿四语及RTL可离线使用。
+- 缺材料、排程冲突或课程修改后未重新检查时阻止导出；保存任务单不修改课程、排程或上课计时，不需要AI或API。
+
+English: export offline task sheets per learning group from a checked schedule, with chronological activities, timing, objectives, materials, teaching mode, prerequisites, adopted adjustments and paper completion boxes. Each group starts a new printed page; A4 and Letter are supported. Includes oral briefing guidance for groups unable to read, four languages and RTL. Unchecked or stale lessons cannot export; the lesson and clock remain unchanged.
+
 ## 0.6.3 — 2026-10-24
 
 - 重做工作台排版：以真实课程名为主标题，分开课程信息、学习组摘要和工具入口；桌面浅色导航、移动端顶部导航，统一表单和控件。

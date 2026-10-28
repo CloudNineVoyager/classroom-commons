@@ -8,6 +8,7 @@ import { auditResources, adoptAlternative, parseAssistantReply, parseAssistantPr
 import { editableProject, duplicateActivity, readCourseFile, writeCourseFile } from './project-file.mjs';
 import { demo } from './demo.mjs';
 import { languages, translate } from './i18n.mjs';
+import { groupSheetsHTML } from './group-sheets.mjs';
 
 const root = document.querySelector('#app'), reactRoot = createRoot(root);
 const e = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -278,6 +279,10 @@ async function action(name, itemId) {
     if (name === 'sample') askReplace(demo(lang).title, () => { replaceCourse({ project: demo(lang) }); tab = 'overview'; toast(t('loadTip')); });
     if (name === 'open') document.querySelector('#file-input').click();
     if (name === 'export') await saveFile(courseFilename('json'), writeCourseFile(project, schedule), 'json');
+    if (name === 'group-sheets') {
+      if (checkSchedule(project, schedule).length) { toast(u('groupSheetsNotReady')); return; }
+      await saveFile(courseFilename('html').replace(/-lesson\.html$/, '-groups.html'), groupSheetsHTML(project, schedule, { lang, paper }), 'html');
+    }
     if (name === 'portable') { await saveFile(courseFilename('html'), lessonHTML(), 'html'); toast(t('offlineHint')); }
     if (name === 'print') {
       const frame = document.createElement('iframe'); frame.className = 'print-frame'; frame.title = t('print');
