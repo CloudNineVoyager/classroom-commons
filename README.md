@@ -2,11 +2,13 @@
 
 ## Download and start / 下载与开始使用
 
-1. [Download the v0.6.3 portable toolkit / 下载便携工具包](https://github.com/CloudNineVoyager/classroom-commons/releases/download/v0.6.3/Classroom-Commons-portable.zip). Choose this ZIP for teaching, not the source-code archive. / 老师请选择便携工具包，不是源码包。
+Before upgrading, export your course JSON as a backup. The new version can still import your existing courses. / 升级前请先导出自己的课程JSON备份；新版仍能导入原课程。
+
+1. [Download the v0.6.4 portable toolkit / 下载便携工具包](https://github.com/CloudNineVoyager/classroom-commons/releases/download/v0.6.4/Classroom-Commons-portable.zip). Choose this ZIP for teaching, not the source-code archive. / 老师请选择便携工具包，不是源码包。
 2. Extract the ZIP completely, then open **老师先看这里.html** (includes English instructions). / 完整解压后，打开 **老师先看这里.html**。
 3. Use its button to open **Classroom-Commons.html** in your browser. Core planning works offline without an account or API key. / 点击入口按钮打开工作台；核心备课功能可离线使用，无需账号或 API 密钥。
 
-[Release notes and other downloads / 更新说明与其他下载](https://github.com/CloudNineVoyager/classroom-commons/releases/tag/v0.6.3) · [Feedback and bug reports / 使用反馈与问题报告](https://github.com/CloudNineVoyager/classroom-commons/issues)
+[Release notes and other downloads / 更新说明与其他下载](https://github.com/CloudNineVoyager/classroom-commons/releases/tag/v0.6.4) · [Feedback and bug reports / 使用反馈与问题报告](https://github.com/CloudNineVoyager/classroom-commons/issues)
 
 For feedback, include your toolkit version, browser, steps and expected/actual results. GitHub Issues are public: remove student names, contact details, API keys and other private information before posting. / 反馈请说明工具版本、浏览器、操作步骤及预期与实际结果。GitHub Issues 是公开的，请勿上传学生姓名、联系方式、API 密钥等隐私信息。
 
