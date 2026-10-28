@@ -121,3 +121,8 @@ footer { padding: 22px clamp(26px,5vw,76px); font-size: 12px; border-top: 1px so
 }
 @media print { .app-header { display: none; } .workspace { margin: 0; } main, main.home-main { padding: 0; } .card { box-shadow: none; } }
 @media (prefers-reduced-motion: reduce) { .module-entry:hover .module-arrow, .button:active:not(:disabled) { transform: none; } }
+.group-sheet-tools{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:20px 0;margin:0 0 24px;border-bottom:1px solid var(--border,#dedbd4)}
+.group-sheet-tools h3{font-size:16px;margin:0 0 6px;font-weight:600}
+.group-sheet-tools p{max-width:660px;font-size:14px;margin:0;line-height:1.7}
+.group-sheet-tools>.button{flex-shrink:0}
+@media(max-width:640px){.group-sheet-tools{align-items:flex-start;flex-direction:column;gap:12px}}
