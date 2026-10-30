@@ -33,6 +33,15 @@
 <p>排程里的活动条可以点开查看目标和材料；想修改活动，请回到下方的“教学活动”。</p>
 <p>顶栏和首页四个编号模块都能进入“我的课堂”“课堂排程”“资源适配”“AI 助手”。随时点顶栏“首页”回来；课程卡可继续编辑；保存当前课程用首页下方的“保存项目文件”。</p>
 
+<h2>把几节课存进本机备课册</h2>
+<p><b>升级前：</b>先导出自己的课程JSON备份。旧版本用户请先打开新版0.6.6工作台，再导入本版整本备课册JSON；单节JSON仍用“打开项目”。</p>
+<p lang="en">Before upgrading, export your lesson JSON files. Open the new v0.6.6 workbench before importing a whole-library backup; single-lesson JSON still uses “Open project”.</p>
+<p><b>一次备份全部课程：</b>在首页点“备份整本备课册”，将下载的JSON保存在自己的备份位置。换电脑、换浏览器或更新HTML后，点“导入备课册备份”，选这份JSON，核对新增和跳过数量，再点“添加到备课册”。取消不会写入，相同内容会跳过，同名但已修改的课会保留为另一份；超过20节课时整批取消。导入不替换当前课程。</p>
+<p>整本备份只带走已“另存一份”的副本，不含当前课尚未另存的修改。请先保存需要保留的版本，再备份。单节课程JSON仍通过“打开项目”导入；不要把它当作整本备课册备份。</p>
+<p lang="en">Use “Back up all lessons” to save one JSON containing all saved shelf copies. On another browser or device, choose “Import lesson backup”, review new/skipped counts and confirm. Identical content is skipped; the current lesson and existing copies stay unchanged. Imports exceeding 20 lessons are cancelled as a whole. Save current edits as a shelf copy before backing up. Single-lesson JSON still uses “Open project”.</p>
+<p>回到“首页”，点<b>“把当前课另存一份”</b>，就能留下一份包含分组、材料、活动和有效排程的副本，最多20份。下次点副本旁的<b>“打开这节课”</b>；想保留当前课程，先导出备份或取消打开。打开未排程的课后，请先生成课堂排程。</p>
+<p>保存是手动另存，继续编辑不会更新旧副本。副本旁可<b>“导出JSON”</b>，以后用“打开项目”导回。移除只影响备课册中的副本，不改变当前课，确认前也可以导出或取消。备课册仅存在当前浏览器，换设备、浏览器、清理数据或移动HTML前，请逐课导出JSON备份；它不是云同步。</p>
+<p lang="en">On Home, use “Save a new lesson copy” to keep up to 20 manual copies. Open a copy to reuse its groups, materials, activities and checked schedule; changes to the current lesson do not update earlier copies. Export each copy as JSON before switching browsers, devices or HTML location, or clearing browser data. Reopen JSON with “Open project”. Removing a copy leaves the current lesson unchanged. No account or API is needed.</p>
 <h2>排好课后，直接进入上课模式</h2>
 <p><b>重复用一项练习：</b>在“课堂排程”下方的教学活动卡片点“复制活动”，副本会出现在原活动下方，名称自动选中，方便重命名。修改副本的组别、时长或目标不会影响原活动。前置活动仍指向原来的前置活动，请核对后重新生成排程；每节课最多24项活动。</p>
 <p><b>从中途接着上：</b>在“从指定活动继续”中选择时间、组名和活动，点“定位并暂停”。老师当前指导的组、各组活动和倒计时会一起更新；先核对安排，再点“继续上课”。也可以定位回较早的活动重新讲解。定位只调整课堂计时，不改原排程。</p>
