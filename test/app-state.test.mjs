@@ -9,6 +9,7 @@ import * as examples from '../app/demo.mjs';
 import * as translations from '../app/i18n.mjs';
 import { uiTranslate } from '../app/ui-copy.mjs';
 import { groupSheetsHTML } from '../app/group-sheets.mjs';
+import * as lessonLibrary from '../app/lesson-library.mjs';
 
 // Run the real controller and domain modules. Only React rendering, browser
 // services and the asynchronous Worker/bridge transport are replaced.
@@ -22,18 +23,19 @@ const checkedCourse = () => {
   return JSON.parse(courseFiles.writeCourseFile(project, engine.solve(project).schedule));
 };
 
-async function openApp(course, { host = false, request = null } = {}) {
+async function openApp(course, { host = false, request = null, libraryRaw = null } = {}) {
   const storage = new Map([['cc-course', JSON.stringify(course)]]);
+  if (libraryRaw !== null) storage.set(lessonLibrary.LIBRARY_KEY, libraryRaw);
   const messages = [], downloads = [], timers = new Map(), blobs = new Map(), workers = [], apiCalls = [];
   let view, reply = null, timerId = 0, holdRequest = false, releaseRequest;
-  let apiTransport = async () => JSON.stringify(course.project);
+  let apiTransport = async () => JSON.stringify(course.project), failLibraryWrites = false;
   const toast = { textContent: '', classList: { add() { messages.push(toast.textContent); }, remove() {} } };
   class BrowserURL extends URL {
     static createObjectURL(blob) { const url = `blob:test-${blobs.size}`; blobs.set(url, blob); return url; }
     static revokeObjectURL() {}
   }
   const context = vm.createContext({
-    ...engine, ...courseFiles, ...examples, ...translations, uiTranslate, groupSheetsHTML,
+    ...engine, ...courseFiles, ...examples, ...translations, ...lessonLibrary, uiTranslate, groupSheetsHTML,
     requestApiDraft: async config => { apiCalls.push(config); return apiTransport(config); },
     createElement: (type, props) => ({ type, props }),
     createRoot: () => ({ render(element) { view = element.props; } }),
@@ -45,7 +47,7 @@ async function openApp(course, { host = false, request = null } = {}) {
     },
     location: { hash: host ? '#test-token' : '', protocol: host ? 'http:' : 'file:' },
     navigator: { language: 'en' },
-    localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) },
+    localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => { if (failLibraryWrites && key === lessonLibrary.LIBRARY_KEY) throw new Error('QuotaExceededError'); storage.set(key, value); } },
     crypto: webcrypto, TextEncoder, structuredClone, Blob, URL: BrowserURL, Intl, AbortController,
     window: { CLASSROOM_WORKER_SOURCE: 'self.onmessage = () => {};' },
     Worker: class {
@@ -66,6 +68,11 @@ async function openApp(course, { host = false, request = null } = {}) {
   await settle();
   return {
     storage, messages, apiCalls, downloads,
+    libraryState: () => structuredClone({ lessons: view.library, error: view.libraryError }),
+    failLibraryWrites: value => { failLibraryWrites = value; },
+    closeDialog: () => view.closeDialog(),
+    dialogState: () => view.dialog ? { kind: view.dialog.kind, title: view.dialog.title } : null,
+    importLibrary: async (text, size = new TextEncoder().encode(text).length) => { await view.onLibraryFile({ target: { value: 'backup.json', files: [{ size, text: async () => text }] } }); await settle(); },
     state: () => structuredClone({ project: view.project, schedule: view.schedule, clockRevision: view.clockRevision, pendingId: view.pendingId, draft: view.draft, saveState: view.saveState, apiEnabled: view.apiEnabled, apiBusy: view.apiBusy, apiError: view.apiError }),
     navigate: value => view.onNavigate(value),
     action: async (...args) => { await view.onAction(...args); await settle(); },
@@ -94,6 +101,170 @@ async function openApp(course, { host = false, request = null } = {}) {
     async exportCourse() { await view.onAction('export'); return downloads.at(-1).blob.text(); }
   };
 }
+
+test('whole shelf backup includes saved copies rather than unsaved current edits', async () => {
+  const app = await openApp(checkedCourse());
+  await app.action('library-save');
+  app.field({ id: 'lesson-title', value: 'Unsaved current changes', dataset: {} });
+  const before = app.state();
+  await app.action('library-backup');
+  const backup = lessonLibrary.readLibraryBackup(await app.downloads[0].blob.text());
+  assert.notEqual(courseFiles.readCourseFile(backup[0].course).project.title, before.project.title);
+  assert.deepEqual(app.state(), before);
+  assert.equal(app.apiCalls.length, 0);
+});
+
+test('backup import previews and cancels before merging while preserving the current course and clock', async () => {
+  const course = checkedCourse(), app = await openApp(course);
+  const incoming = lessonLibrary.addLibraryLesson([], 'backup-id', course.project, course.schedule);
+  const raw = lessonLibrary.writeLessonLibrary(incoming), before = app.state();
+  await app.importLibrary(raw);
+  assert.equal(app.dialogState().kind, 'library-restore');
+  assert.equal(app.libraryState().lessons.length, 0);
+  app.closeDialog();
+  assert.equal(app.storage.has(lessonLibrary.LIBRARY_KEY), false);
+  await app.importLibrary(raw); app.confirmDialog();
+  assert.equal(app.libraryState().lessons.length, 1);
+  assert.notEqual(app.libraryState().lessons[0].id, 'backup-id');
+  assert.deepEqual(app.state(), before);
+  assert.deepEqual(app.libraryState().lessons[0].schedule, before.schedule);
+  await app.importLibrary(raw);
+  assert.equal(app.dialogState(), null);
+  assert.equal(app.libraryState().lessons.length, 1);
+  assert.ok(app.messages.includes(uiTranslate('en', 'libraryNoNew')));
+});
+
+test('an earlier slow file read cannot replace the preview for a newer import', async () => {
+  const course = checkedCourse(), app = await openApp(course);
+  let finishOld;
+  const old = app.importLibrary(new Promise(resolve => { finishOld = resolve; }), 10);
+  const raw = lessonLibrary.writeLessonLibrary(lessonLibrary.addLibraryLesson([], 'newer-file', course.project, []));
+  await app.importLibrary(raw);
+  const preview = app.dialogState();
+  finishOld('{invalid'); await old;
+  assert.deepEqual(app.dialogState(), preview);
+  assert.equal(app.libraryState().error, '');
+  app.confirmDialog();
+  assert.equal(app.libraryState().lessons.length, 1);
+});
+
+test('wrong, oversized and quota-failed imports preserve the saved shelf', async () => {
+  const course = checkedCourse(), app = await openApp(course);
+  await app.action('library-save');
+  const before = app.storage.get(lessonLibrary.LIBRARY_KEY);
+  await app.importLibrary(JSON.stringify(course));
+  assert.equal(app.libraryState().error, 'libraryBackupInvalid');
+  await app.importLibrary('{}', lessonLibrary.LIBRARY_BACKUP_LIMIT + 1);
+  assert.equal(app.libraryState().error, 'libraryBackupTooLarge');
+  course.project.title = 'Another lesson';
+  const raw = lessonLibrary.writeLessonLibrary(lessonLibrary.addLibraryLesson([], 'new', course.project, []));
+  await app.importLibrary(raw); app.failLibraryWrites(true); app.confirmDialog();
+  assert.equal(app.libraryState().error, 'librarySaveFailed');
+  assert.equal(app.storage.get(lessonLibrary.LIBRARY_KEY), before);
+  assert.equal(app.libraryState().lessons.length, 1);
+});
+
+test('import confirmation rechecks available capacity when another window changed the shelf', async () => {
+  const course = checkedCourse(), app = await openApp(course);
+  const raw = lessonLibrary.writeLessonLibrary(lessonLibrary.addLibraryLesson([], 'incoming', course.project, []));
+  await app.importLibrary(raw);
+  let full = [];
+  for (let i = 0; i < 20; i++) { course.project.title = `Other window ${i}`; full = lessonLibrary.addLibraryLesson(full, `other-${i}`, course.project, []); }
+  const before = lessonLibrary.writeLessonLibrary(full);
+  app.storage.set(lessonLibrary.LIBRARY_KEY, before); app.confirmDialog();
+  assert.equal(app.libraryState().error, 'libraryFull');
+  assert.equal(app.storage.get(lessonLibrary.LIBRARY_KEY), before);
+});
+
+test('saving and exporting shelf copies preserves the current lesson and clock across reloads', async () => {
+  const app = await openApp(checkedCourse());
+  const before = app.state();
+  await app.action('library-save');
+  assert.deepEqual(app.state(), before);
+  const entry = app.libraryState().lessons[0];
+  assert.deepEqual(entry.schedule, before.schedule);
+  app.field({ id: 'lesson-title', value: 'Tomorrow', dataset: {} });
+  await app.action('library-export', entry.id);
+  assert.equal(app.downloads[0].filename, `Classroom-${before.project.title}.json`);
+  assert.deepEqual(courseFiles.readCourseFile(await app.downloads[0].blob.text()).project, before.project);
+  const reloaded = await openApp(checkedCourse(), { libraryRaw: app.storage.get(lessonLibrary.LIBRARY_KEY) });
+  assert.deepEqual(reloaded.libraryState().lessons[0].project, before.project);
+  assert.equal(app.apiCalls.length, 0);
+});
+
+test('opening a shelf lesson requires confirmation and restores the course with its checked schedule', async () => {
+  const app = await openApp(checkedCourse());
+  await app.action('library-save');
+  const saved = app.libraryState().lessons[0];
+  app.field({ id: 'lesson-title', value: 'Different current lesson', dataset: {} });
+  await app.action('library-open', saved.id);
+  assert.equal(app.state().project.title, 'Different current lesson');
+  app.closeDialog();
+  assert.equal(app.state().project.title, 'Different current lesson');
+  await app.action('library-open', saved.id);
+  const revision = app.state().clockRevision;
+  app.confirmDialog();
+  assert.deepEqual(app.state().project, saved.project);
+  assert.deepEqual(app.state().schedule, saved.schedule);
+  assert.equal(app.state().clockRevision, revision + 1);
+});
+
+test('removing a shelf copy supports cancel and backup without deleting the current lesson', async () => {
+  const app = await openApp(checkedCourse());
+  await app.action('library-save');
+  const entry = app.libraryState().lessons[0], before = app.state();
+  await app.action('library-remove', entry.id); app.closeDialog();
+  assert.equal(app.libraryState().lessons.length, 1);
+  await app.action('library-remove', entry.id);
+  await app.action('library-export', entry.id);
+  assert.deepEqual(courseFiles.readCourseFile(await app.downloads[0].blob.text()).project, before.project);
+  app.confirmDialog();
+  assert.equal(app.libraryState().lessons.length, 0);
+  assert.deepEqual(app.state(), before);
+  assert.equal(lessonLibrary.readLessonLibrary(app.storage.get(lessonLibrary.LIBRARY_KEY)).length, 0);
+});
+
+test('corrupt shelf storage and failed writes cannot overwrite copies or claim a successful save', async () => {
+  const corrupt = await openApp(checkedCourse(), { libraryRaw: '{damaged' });
+  await corrupt.action('library-save');
+  assert.equal(corrupt.storage.get(lessonLibrary.LIBRARY_KEY), '{damaged');
+  assert.equal(corrupt.libraryState().error, 'libraryUnreadable');
+  const app = await openApp(checkedCourse());
+  await app.action('library-save');
+  const raw = app.storage.get(lessonLibrary.LIBRARY_KEY);
+  app.failLibraryWrites(true);
+  await app.action('library-save');
+  assert.equal(app.storage.get(lessonLibrary.LIBRARY_KEY), raw);
+  assert.equal(app.libraryState().lessons.length, 1);
+  assert.equal(app.libraryState().error, 'librarySaveFailed');
+  assert.equal(app.messages.at(-1), uiTranslate('en', 'librarySaveFailed'));
+  await app.action('library-remove', app.libraryState().lessons[0].id); app.confirmDialog();
+  assert.equal(app.storage.get(lessonLibrary.LIBRARY_KEY), raw);
+  assert.equal(app.libraryState().lessons.length, 1);
+});
+
+test('saving a copy retains another window’s newer entries and excludes AI notes and API secrets', async () => {
+  const app = await openApp(checkedCourse());
+  const external = lessonLibrary.addLibraryLesson([], 'other-window', checkedCourse().project, checkedCourse().schedule);
+  app.storage.set(lessonLibrary.LIBRARY_KEY, lessonLibrary.writeLessonLibrary(external));
+  app.field({ id: 'notes', value: 'private-notes', dataset: {} });
+  app.apiField({ id: 'api-key', value: 'private-key' });
+  await app.action('library-save');
+  assert.equal(app.libraryState().lessons.length, 2);
+  assert.equal(app.libraryState().lessons[1].id, 'other-window');
+  assert.doesNotMatch(app.storage.get(lessonLibrary.LIBRARY_KEY), /private-notes|private-key/);
+});
+
+test('a library copy with a damaged schedule opens its activities and requests replanning', async () => {
+  const course = checkedCourse();
+  course.schedule[0].start = 240;
+  const raw = JSON.stringify({ format: 'classroom-commons-library', version: 1, lessons: [{ id: 'damaged-plan', course: JSON.stringify(course) }] });
+  const app = await openApp(checkedCourse(), { libraryRaw: raw });
+  await app.action('library-open', 'damaged-plan'); app.confirmDialog();
+  assert.deepEqual(app.state().project, course.project);
+  assert.deepEqual(app.state().schedule, []);
+  assert.ok(app.messages.includes(translations.translate('en', 'scheduleDiscarded')));
+});
 
 test('teaching clock resets for a newly accepted plan or edit, but not navigation or retained plans', async () => {
   const app = await openApp(checkedCourse());
