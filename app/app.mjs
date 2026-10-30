@@ -9,6 +9,7 @@ import { editableProject, duplicateActivity, readCourseFile, writeCourseFile } f
 import { demo } from './demo.mjs';
 import { languages, translate } from './i18n.mjs';
 import { groupSheetsHTML } from './group-sheets.mjs';
+import { LIBRARY_KEY, LIBRARY_LIMIT, LIBRARY_BACKUP_LIMIT, readLessonLibrary, writeLessonLibrary, addLibraryLesson, readLibraryBackup, mergeLessonLibraries } from './lesson-library.mjs';
 
 const root = document.querySelector('#app'), reactRoot = createRoot(root);
 const e = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -39,6 +40,9 @@ let bridgeReady = false, hostLoading = hostSession, saveQueue = Promise.resolve(
 let saveState = restoredCourse && !restoreScheduleDiscarded ? 'saved' : 'unsaved', aiSaveState = 'saved', dialog = null;
 let delayTask = '', delayMinutes = 5, copyFallbackText = '', clockRevision = 0;
 let paper = preferences.paper === 'Letter' ? 'Letter' : 'A4';
+let library = [], libraryError = '', libraryImportVersion = 0;
+try { library = readLessonLibrary(localStorage.getItem(LIBRARY_KEY)); }
+catch { libraryError = 'libraryUnreadable'; }
 let apiEnabled = false, apiUrl = '', apiModel = '', apiKey = '', apiBusy = false, apiError = '', apiAbort = null;
 const apiErrors = new Set(['apiInvalidUrl', 'apiMissingModel', 'apiInvalidKey', 'apiTimeout', 'apiNetwork', 'apiHttp', 'apiInvalidReply', 'apiTooLarge', 'apiCancelled']);
 const t = key => translate(lang, key), u = key => uiTranslate(lang, key);
@@ -114,13 +118,14 @@ function render() {
   flushSync(() => reactRoot.render(createElement(Workbench, {
     project, schedule, clockRevision, tab, result, workerBusy: Boolean(worker), busy, draft, notes, rawDraft, pendingId, replyError,
     bridgeReady, hostLoading, saveState, aiSaveState, paper, lang, languages, t, u, n, issueText, dialog,
+    library: library.map(entry => ({ id: entry.id, ...readCourseFile(entry.course), needsRecheck: entry.needsRecheck })), libraryError, libraryLimit: LIBRARY_LIMIT,
     problems: auditResources(project), validation: validateProject(project), draftProblems: draft ? auditResources(draft) : [],
     draftConfirmed, confirmations, delayTask, delayMinutes, makePrompt: () => copyFallbackText || makePrompt(),
     onNavigate: value => {
       tab = value; render();
       document.querySelector('#main-content')?.focus?.({ preventScroll: true });
       window.scrollTo?.({ top: 0, behavior: 'instant' });
-    }, onField: fieldChanged, onAction: action, onFile: openFile,
+    }, onField: fieldChanged, onAction: action, onFile: openFile, onLibraryFile: openLibraryFile,
     apiEnabled, apiUrl, apiModel, apiKey, apiBusy, apiError, onApiField: apiFieldChanged,
     onDraftConfirmed: value => { draftConfirmed = value; render(); },
     onConfirmAlternative: (taskId, value) => { confirmations[taskId] = value; render(); },
@@ -129,6 +134,18 @@ function render() {
   })));
 }
 function askReplace(title, accept) { dialog = { title, accept, returnFocus: document.activeElement }; render(); }
+function updateLibrary(transform) {
+  try {
+    // Re-read before changing storage so another open window's saves survive.
+    const latest = readLessonLibrary(localStorage.getItem(LIBRARY_KEY));
+    const next = transform(latest);
+    localStorage.setItem(LIBRARY_KEY, writeLessonLibrary(next));
+    library = next; libraryError = ''; render(); return true;
+  } catch (error) {
+    const code = ['libraryUnreadable', 'libraryFull'].includes(error.message) ? error.message : 'librarySaveFailed';
+    libraryError = code; toast(u(code)); render(); return false;
+  }
+}
 function replaceCourse(loaded) {
   clockRevision++;
   stopSolver(); project = loaded.project; schedule = loaded.schedule || [];
@@ -233,8 +250,8 @@ async function saveFile(name, content, type) {
   const url = URL.createObjectURL(new Blob([content], { type: type === 'html' ? 'text/html;charset=utf-8' : 'application/json' }));
   const a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 2000); toast(t('exported'));
 }
-function courseFilename(kind) {
-  const stem = Array.from(project.title.replace(/[<>:"/\\|?*\u0000-\u001f]/g, '-').trim()).slice(0, 80).join('') || 'project';
+function courseFilename(kind, title = project.title) {
+  const stem = Array.from(title.replace(/[<>:"/\\|?*\u0000-\u001f]/g, '-').trim()).slice(0, 80).join('') || 'project';
   return `Classroom-${stem}${kind === 'html' ? '-lesson.html' : '.json'}`;
 }
 function lessonHTML() {
@@ -275,6 +292,26 @@ function fieldChanged(event) {
 }
 async function action(name, itemId) {
   try {
+    if (name === 'library-backup') {
+      try {
+        const latest = readLessonLibrary(localStorage.getItem(LIBRARY_KEY));
+        await saveFile('Classroom-Commons-lesson-library.json', writeLessonLibrary(latest), 'json');
+      } catch { libraryError = 'libraryUnreadable'; toast(u(libraryError)); }
+    }
+    if (name === 'library-import') document.querySelector('#library-file-input').click();
+    if (name === 'library-save') {
+      if (!project.title.trim()) { toast(u('libraryNameNeeded')); return; }
+      if (updateLibrary(latest => addLibraryLesson(latest, id('lesson'), project, schedule))) toast(u('librarySaved'));
+    }
+    if (['library-open', 'library-export', 'library-remove'].includes(name)) {
+      const entry = library.find(lesson => lesson.id === itemId); if (!entry) return;
+      const loaded = readCourseFile(entry.course);
+      if (name === 'library-open') askReplace(loaded.project.title, () => { replaceCourse({ ...loaded, scheduleDiscarded: loaded.scheduleDiscarded || entry.needsRecheck }); tab = 'overview'; });
+      if (name === 'library-export') await saveFile(courseFilename('json', loaded.project.title), entry.course, 'json');
+      if (name === 'library-remove') {
+        dialog = { kind: 'library-remove', itemId, title: loaded.project.title, returnFocus: document.activeElement, accept: () => { if (updateLibrary(latest => latest.filter(lesson => lesson.id !== itemId))) toast(u('libraryRemoved')); } }; render();
+      }
+    }
     if (name === 'new') askReplace(u('newCourse'), () => { replaceCourse({ project: { version: 1, title: '', duration: 40, groups: [{ id: id('group'), name: t('newGroup'), canRead: false, independentLimit: 10 }], resources: [], tasks: [] } }); tab = 'overview'; });
     if (name === 'sample') askReplace(demo(lang).title, () => { replaceCourse({ project: demo(lang) }); tab = 'overview'; toast(t('loadTip')); });
     if (name === 'open') document.querySelector('#file-input').click();
@@ -341,6 +378,34 @@ async function openFile(event) {
     const loaded = readCourseFile(await file.text());
     askReplace(loaded.project.title, () => { replaceCourse(loaded); tab = 'overview'; });
   } catch (error) { toast(t(error.message) === error.message ? t('importFailed') : t(error.message)); }
+}
+async function openLibraryFile(event) {
+  const file = event.target.files[0]; event.target.value = ''; if (!file) return;
+  const version = ++libraryImportVersion;
+  let incoming;
+  try {
+    if (file.size > LIBRARY_BACKUP_LIMIT) throw new Error('libraryBackupTooLarge');
+    incoming = readLibraryBackup(await file.text());
+  } catch (error) {
+    if (version !== libraryImportVersion) return;
+    libraryError = error.message === 'libraryBackupTooLarge' ? error.message : 'libraryBackupInvalid';
+    toast(u(libraryError)); render(); return;
+  }
+  if (version !== libraryImportVersion) return;
+  try {
+    const latest = readLessonLibrary(localStorage.getItem(LIBRARY_KEY));
+    const preview = mergeLessonLibraries(latest, incoming, () => id('lesson'));
+    library = latest; libraryError = '';
+    if (!preview.added) { toast(u('libraryNoNew')); render(); return; }
+    dialog = { kind: 'library-restore', title: `${u('libraryAddCount')} ${n(preview.added)} · ${u('librarySkipCount')} ${n(preview.skipped)}`, returnFocus: document.activeElement, accept: () => {
+      let merged;
+      const saved = updateLibrary(current => { merged = mergeLessonLibraries(current, incoming, () => id('lesson')); return merged.lessons; });
+      if (saved) toast(`${u('libraryRestored')} ${n(merged.added)} · ${u('librarySkipCount')} ${n(merged.skipped)}`);
+    } }; render();
+  } catch (error) {
+    libraryError = error.message === 'libraryFull' ? 'libraryFull' : 'libraryUnreadable';
+    toast(u(libraryError)); render();
+  }
 }
 render();
 if (restoreFailed) toast(t('restoreFailed'));
