@@ -9,6 +9,7 @@ import { editableProject, duplicateActivity, readCourseFile, writeCourseFile } f
 import { demo } from './demo.mjs';
 import { languages, translate } from './i18n.mjs';
 import { groupSheetsHTML } from './group-sheets.mjs';
+import { materialsListHTML } from './materials-list.mjs';
 import { LIBRARY_KEY, LIBRARY_LIMIT, LIBRARY_BACKUP_LIMIT, readLessonLibrary, writeLessonLibrary, addLibraryLesson, readLibraryBackup, mergeLessonLibraries } from './lesson-library.mjs';
 
 const root = document.querySelector('#app'), reactRoot = createRoot(root);
@@ -316,6 +317,10 @@ async function action(name, itemId) {
     if (name === 'sample') askReplace(demo(lang).title, () => { replaceCourse({ project: demo(lang) }); tab = 'overview'; toast(t('loadTip')); });
     if (name === 'open') document.querySelector('#file-input').click();
     if (name === 'export') await saveFile(courseFilename('json'), writeCourseFile(project, schedule), 'json');
+    if (name === 'materials-list') {
+      if (checkSchedule(project, schedule).length) { toast(u('materialsNotReady')); return; }
+      await saveFile(courseFilename('html').replace(/-lesson\.html$/, '-materials.html'), materialsListHTML(project, schedule, { lang, paper }), 'html');
+    }
     if (name === 'group-sheets') {
       if (checkSchedule(project, schedule).length) { toast(u('groupSheetsNotReady')); return; }
       await saveFile(courseFilename('html').replace(/-lesson\.html$/, '-groups.html'), groupSheetsHTML(project, schedule, { lang, paper }), 'html');
