@@ -1,4 +1,8 @@
-# 交付状态 · Classroom Commons 0.6.6
+# 交付状态 · Classroom Commons 0.6.7
+
+## 0.6.7 功能更新
+
+2026-11-03完成课前材料清单：计算材料最多同时用量，列出逐组活动/时段/数量，导出带打勾框的离线打印HTML。复用规则沿用现有排程，消耗品另备；四语/RTL、A4/Letter可用。导出仅限有效排程，不改变课程或计时；无新增依赖或API调用。只交付本地包，未操作GitHub。验证见research/release-0.6.7-verification.md。
 
 ## 0.6.6 功能更新
 

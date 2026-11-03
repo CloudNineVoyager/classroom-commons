@@ -1,5 +1,14 @@
 # Changelog / 更新记录
 
+## 0.6.7 — 2026-11-03
+
+- 新增课前材料清单：根据已检查的排程计算每种材料最多同时需要的数量，轮流使用不重复相加。
+- 列出每种材料的可用量，以及每个学习组的活动、使用时段和数量；不列出未用库存。
+- 一键保存不含脚本或外部资源的HTML，离线打开后打印或另存PDF，支持A4 / Letter、四语和RTL，并提供纸上打勾方框。
+- 编辑后或排程未通过检查时阻止导出；导出不改变课程、备课册或上课计时。清单明确提示材料复用假设，消耗品需另备补充量。
+
+English: added a printable offline materials checklist with peak simultaneous demand, available quantities and each group’s timed use. Reusable materials are not summed across sequential activities; unused inventory is omitted. Supports four languages, RTL and A4 / Letter. Export requires a checked schedule and preserves lesson data and clock. Consumable replacements require a separate teacher check.
+
 ## 0.6.6 — prepared 2026-10-30 (publication timestamp: GitHub Release / 实际发布时间以GitHub Release为准)
 
 - 新增整本备课册JSON备份和导入，可一次带走已保存的多节课，在其他浏览器或设备中导回；不需要账号、AI或API。
