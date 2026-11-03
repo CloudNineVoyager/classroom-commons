@@ -9,6 +9,7 @@ import * as examples from '../app/demo.mjs';
 import * as translations from '../app/i18n.mjs';
 import { uiTranslate } from '../app/ui-copy.mjs';
 import { groupSheetsHTML } from '../app/group-sheets.mjs';
+import { materialsListHTML } from '../app/materials-list.mjs';
 import * as lessonLibrary from '../app/lesson-library.mjs';
 
 // Run the real controller and domain modules. Only React rendering, browser
@@ -35,7 +36,7 @@ async function openApp(course, { host = false, request = null, libraryRaw = null
     static revokeObjectURL() {}
   }
   const context = vm.createContext({
-    ...engine, ...courseFiles, ...examples, ...translations, ...lessonLibrary, uiTranslate, groupSheetsHTML,
+    ...engine, ...courseFiles, ...examples, ...translations, ...lessonLibrary, uiTranslate, groupSheetsHTML, materialsListHTML,
     requestApiDraft: async config => { apiCalls.push(config); return apiTransport(config); },
     createElement: (type, props) => ({ type, props }),
     createRoot: () => ({ render(element) { view = element.props; } }),
@@ -485,4 +486,25 @@ test('API errors and malformed responses preserve the course and allow manual dr
     assert.ok(app.state().draft);
     assert.deepEqual(app.state().project, course.project);
   }
+});
+
+test('materials checklist exports current language and paper without changing course, shelf or clock', async () => {
+  const app = await openApp(checkedCourse());
+  app.field({ id: 'language', value: 'ar', dataset: {} });
+  app.field({ id: 'paper', value: 'Letter', dataset: {} });
+  const before = app.state(), saved = [...app.storage];
+  await app.action('materials-list');
+  assert.equal(app.downloads.length, 1);
+  assert.ok(app.downloads[0].filename.endsWith('-materials.html'));
+  const html = await app.downloads[0].blob.text();
+  assert.ok(html.includes('lang="ar" dir="rtl"')); assert.ok(html.includes('@page{size:Letter;'));
+  assert.deepEqual(app.state(), before); assert.deepEqual([...app.storage], saved); assert.equal(app.apiCalls.length, 0);
+});
+test('course edits block materials export until a new schedule passes checking', async () => {
+  const app = await openApp(checkedCourse());
+  app.field({ id: 'lesson-title', value: 'Changed materials lesson', dataset: {} });
+  await app.action('materials-list'); assert.equal(app.downloads.length, 0);
+  assert.ok(app.messages.includes(uiTranslate('en', 'materialsNotReady')));
+  await app.action('solve'); app.finishSolver(); await app.action('materials-list');
+  assert.equal(app.downloads.length, 1); assert.ok((await app.downloads[0].blob.text()).includes('Changed materials lesson'));
 });
